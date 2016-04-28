@@ -1,21 +1,11 @@
-// Version 0.01
+// Version 0.02
 
 #include <stdio.h>
 #include <time.h>
 #include <unistd.h>
 //#include <dirent.h>
 
-#define SYSDIR "/sys"
-#define PROCDIR "/proc"
-
-#define ACFILE		SYSDIR "/class/power_supply/AC/online"
-#define BATTERYCAPFILE	SYSDIR "/class/power_supply/BAT0/capacity"
-#define CPU0FREQFILE	SYSDIR "/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq"
-#define CPU0TEMPFILE	SYSDIR "/class/hwmon/hwmon1/temp1_input"
-#define ENPCARRIERFILE	SYSDIR "/class/net/enp0s25/carrier"
-#define WLPCARRIERFILE	SYSDIR "/class/net/wlp4s0/carrier"
-#define PROCMEMINFOFILE	PROCDIR "/meminfo"
-//#define BATTERYDIR "/sys/class/power_supply/BAT0"
+#include "config.h"
 
 /* Network Connections */
 char *net(void) {
@@ -39,6 +29,7 @@ char *net(void) {
 	}
 }
 
+/* Memory used */
 long long unsigned int memused(void) {
 	FILE *meminfo;
 	meminfo = fopen(PROCMEMINFOFILE, "r");
