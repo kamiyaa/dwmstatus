@@ -11,6 +11,7 @@ Features:
    - only when unplugged
 
  - Displays memory used
+   - will only display in Megabytes
 
  - Displays cpu frequency
    - currently commented 
@@ -22,5 +23,5 @@ Features:
    - requires the kernel to expose hwmon in sysfs
 
  - Displays network connections
-   - Only displays if connected or not
-   - Cannot check for internet access
+   - only displays if connected or not
+   - cannot check for internet access
