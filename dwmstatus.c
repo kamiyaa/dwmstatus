@@ -44,6 +44,7 @@ long long unsigned int memused(void) {
 	sscanf(buffer, "Buffers: %32llu", &buffers);
 	fgets(buffer, 128, meminfo);
 	sscanf(buffer, "Cached: %32llu", &cached);
+	fclose(meminfo);
 	return (memtotal - memfree - buffers - cached) / 1024;
 }
 
