@@ -1,9 +1,10 @@
-// Version 0.02
+// Version 0.03
 
 #include <stdio.h>
 #include <time.h>
 #include <unistd.h>
 //#include <dirent.h>
+#include <X11/Xlib.h>
 
 #include "config.h"
 
@@ -17,15 +18,15 @@ char *net(void) {
 	fclose(west);
 
 	if (wlan == '1')
-		return "<--->";
+		return "<--->\0";
 	else {
 		west = fopen(ENPCARRIERFILE, "r");
 		wlan = (int)fgetc(west);
 		fclose(west);
 		if (wlan == '1')
-			return "[---]";
+			return "[---]\0";
 		else
-			return "--/--";
+			return "--/--\0";
 	}
 }
 
@@ -104,9 +105,22 @@ char *unixtime(void) {
 }
 
 int main(void) {
-	printf("%s ┃ %lluMB ┃ [%u%%] ┃ %s\n", net(), memused(), power(), unixtime());
-//	sleep(3);
-
+	Display *dpy;
+	Window root;
+	dpy=XOpenDisplay(NULL);
+	if ( dpy == NULL) {
+		fprintf(stderr, "ERROR: could not open display\n");
+		return 1;
+	}
+	root = XRootWindow(dpy,DefaultScreen(dpy));
+	//printf("%s ┃ %lluMB ┃ [%u%%] ┃ %s\n", net(), memused(), power(), unixtime());
+	char status[80];
+	for (;;) {
+		sprintf(status, "%s ┃ %lluMB ┃ [%u%%] ┃ %s", net(), memused(), power(), unixtime());;
+		XStoreName(dpy,root,status);
+		XFlush(dpy);
+		sleep(3);
+	}
 //	printf("%s ┃ %uM ┃ %0.1fGHz ┃ %hu°C ┃ [%u%%] ┃ %s\n", net(), mem(), freq(), temp(), power(), unixtime());
 //	printf("%s ┃ %0.1fGHz ┃ %u°C ┃ [%u%%] ┃ %s\n", net(), freq(), temp(), power(), unixtime());
 	return 0;
