@@ -1,0 +1,10 @@
+Version 0.04
+ - Changed back to stdio instead of xlib because of memory leak and ease of use.
+ - Added support for displaying uptime
+
+Version 0.03
+
+Version 0.02
+
+Version 0.01
+

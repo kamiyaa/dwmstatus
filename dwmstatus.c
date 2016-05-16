@@ -1,10 +1,11 @@
-// Version 0.03
+// Version 0.04
 
 #include <stdio.h>
-#include <time.h>
 #include <unistd.h>
-//#include <dirent.h>
-#include <X11/Xlib.h>
+#include <time.h>
+
+// #include <X11/Xlib.h>
+// #include <dirent.h>
 
 #include "config.h"
 
@@ -13,14 +14,14 @@ char *net(void) {
 	FILE *west;
 	char wlan;
 
-	west = fopen(WLPCARRIERFILE, "r");
+	west = fopen(WLAN_CARFILE, "r");
 	wlan = fgetc(west);
 	fclose(west);
 
 	if (wlan == '1')
 		return "<--->\0";
 	else {
-		west = fopen(ENPCARRIERFILE, "r");
+		west = fopen(ETH_CARFILE, "r");
 		wlan = (int)fgetc(west);
 		fclose(west);
 		if (wlan == '1')
@@ -33,7 +34,7 @@ char *net(void) {
 /* Memory used */
 long long unsigned int memused(void) {
 	FILE *meminfo;
-	meminfo = fopen(PROCMEMINFOFILE, "r");
+	meminfo = fopen(MEMINFOFILE, "r");
 	char buffer[128];
 	long long unsigned int memtotal, memfree, buffers, cached;
 	fgets(buffer, 128, meminfo);
@@ -78,17 +79,40 @@ unsigned short power(void) {
 	FILE *ac;
 	unsigned short supply;
 
-	ac = fopen(ACFILE, "r");
+	ac = fopen(AC_FILE, "r");
 	supply = fgetc(ac);
 	fclose(ac);
 	if (supply == 49)
 		return 0;
 	else {
-		ac = fopen(BATTERYCAPFILE, "r");
+		ac = fopen(BAT_CAPFILE, "r");
 		fscanf(ac, "%hu", &supply);
 		fclose(ac);
 		return supply;
 	}
+}
+
+/* Uptime */
+unsigned int uptime(char hm) {
+	long long unsigned int timeup;
+	FILE *fuptime;
+	fuptime = fopen(UPTIMEFILE, "r");
+	char buffer[16];
+	fgets(buffer, 16, fuptime);
+	sscanf(buffer, "%32llu", &timeup);
+	fclose(fuptime);
+	unsigned int times[2];
+	times[0] = 0;
+	timeup = timeup / 60;
+	while (timeup > 60) {
+		times[0]++;
+		timeup-=60;
+	}
+	times[1] = timeup;
+	if (hm == 'h')
+		return times[0];
+	else
+		return times[1];
 }
 
 /* Date/time */
@@ -105,24 +129,8 @@ char *unixtime(void) {
 }
 
 int main(void) {
-	Display *dpy;
-	Window root;
-	dpy=XOpenDisplay(NULL);
-	if ( dpy == NULL) {
-		fprintf(stderr, "ERROR: could not open display\n");
-		return 1;
-	}
-	root = XRootWindow(dpy,DefaultScreen(dpy));
-	//printf("%s ┃ %lluMB ┃ [%u%%] ┃ %s\n", net(), memused(), power(), unixtime());
-	char status[80];
-	for (;;) {
-		sprintf(status, "%s ┃ %lluMB ┃ [%u%%] ┃ %s", net(), memused(), power(), unixtime());;
-		XStoreName(dpy,root,status);
-		XFlush(dpy);
-		sleep(3);
-	}
-//	printf("%s ┃ %uM ┃ %0.1fGHz ┃ %hu°C ┃ [%u%%] ┃ %s\n", net(), mem(), freq(), temp(), power(), unixtime());
-//	printf("%s ┃ %0.1fGHz ┃ %u°C ┃ [%u%%] ┃ %s\n", net(), freq(), temp(), power(), unixtime());
+	printf("%s ┃ %lluMB ┃ [%u%%] ┃ Uptime: %u:%u ┃ %s", net(), memused(), power(), uptime('h'), uptime('m'), unixtime());
+//	sleep(3);
 	return 0;
 }
 
@@ -131,3 +139,18 @@ int main(void) {
 
 //#define MB 1048576
 //#define GB 1073741824
+
+/*	Display *dpy;
+	Window root;
+	dpy = XOpenDisplay(NULL);
+	if (dpy == NULL) {
+		fprintf(stderr, "ERROR: could not open display\n");
+		return 1;
+	}
+	root = XRootWindow(dpy,DefaultScreen(dpy));
+	for (;;) {
+		sprintf(status, "%s ┃ %lluMB ┃ [%u%%] ┃ Uptime: %u:%u ┃ %s", net(), memused(), power(), uptime('h'), uptime('m'), unixtime());
+		XStoreName(dpy,root,status);
+		XFlush(dpy);
+		sleep(3);
+	}*/
