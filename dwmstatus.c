@@ -37,6 +37,7 @@ long long unsigned int memused(void) {
 	meminfo = fopen(MEMINFOFILE, "r");
 	char buffer[128];
 	long long unsigned int memtotal, memfree, buffers, cached;
+
 	fgets(buffer, 128, meminfo);
 	sscanf(buffer, "MemTotal: %32llu", &memtotal);
 	fgets(buffer, 128, meminfo);
@@ -51,16 +52,16 @@ long long unsigned int memused(void) {
 }
 
 /* CPU (core0) freq */
-/*float freq(void) {
+float freq(void) {
 	FILE *freq;
 	float corefreq;
 
-	freq = fopen(CPU0FREQFILE, "r");
+	freq = fopen(CPU_FREQFILE, "r");
 	fscanf(freq, "%f", &corefreq);
 	corefreq = corefreq * 0.000001;
 	fclose(freq);
 	return corefreq;
-}*/
+}
 
 /* CPU (core0) temp */
 /*unsigned short temp(void) {
@@ -96,6 +97,7 @@ unsigned short power(void) {
 unsigned int uptime(char hm) {
 	long long unsigned int timeup;
 	FILE *fuptime;
+
 	fuptime = fopen(UPTIMEFILE, "r");
 	char buffer[16];
 	fgets(buffer, 16, fuptime);
@@ -103,12 +105,11 @@ unsigned int uptime(char hm) {
 	fclose(fuptime);
 	unsigned int times[2];
 	times[0] = 0;
-	timeup = timeup / 60;
-	while (timeup > 60) {
-		times[0]++;
-		timeup-=60;
+	if (timeup > 3600) {
+		times[0] = timeup / 3600;
+		timeup = timeup - 3600 * times[0];
 	}
-	times[1] = timeup;
+	times[1] = timeup / 60;
 	if (hm == 'h')
 		return times[0];
 	else
@@ -129,8 +130,9 @@ char *unixtime(void) {
 }
 
 int main(void) {
-	printf("%s ┃ %lluMB ┃ [%u%%] ┃ Uptime: %u:%u ┃ %s", net(), memused(), power(), uptime('h'), uptime('m'), unixtime());
-//	sleep(3);
+	printf("%s ┃ %lluMB ┃ %0.1fGHz ┃ [%u%%] ┃ Uptime: %u:%u ┃ %s",
+		net(), memused(), freq(), power(), uptime('h'), uptime('m'), unixtime());
+	sleep(3);
 	return 0;
 }
 

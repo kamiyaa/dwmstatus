@@ -3,8 +3,9 @@ Version 0.04
  - Added support for displaying uptime
 
 Version 0.03
+ - Added support for xlib
+ - Added support for displaying used memory in MB only
 
 Version 0.02
 
 Version 0.01
-

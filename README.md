@@ -1,11 +1,13 @@
 # dwmstatus
 A hardlinked status bar for dwm, written in C.
 
-Should output something like this:
-<---> ┃ 440MB ┃ [0%] ┃ Friday 29/10 09:10
+Output should look something like this:
+<---> ┃ 427MB ┃ [0%] ┃ Uptime: 0:17 ┃ Monday 16/05 08:03
 
 Features:
  - Displays date
+
+ - Displays uptime
 
  - Displays battery percentage
    - only when unplugged

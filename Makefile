@@ -1,6 +1,7 @@
 # Makefile
 
-LIBS = -lX11
+#LIBS = -lX11
+LIBS = 
 
 all: dwmstatus
 
