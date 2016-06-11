@@ -1,4 +1,4 @@
-// Version 0.04
+/* Version 0.05 */
 
 #include <stdio.h>
 #include <unistd.h>
@@ -9,21 +9,23 @@
 
 #include "config.h"
 
+unsigned int delay = 3;
+
 /* Network Connections */
 char *net(void) {
-	FILE *west;
+	FILE *carrier;
 	char wlan;
 
-	west = fopen(WLAN_CARFILE, "r");
-	wlan = fgetc(west);
-	fclose(west);
+	carrier = fopen(WLAN_CARFILE, "r");
+	wlan = fgetc(carrier);
+	fclose(carrier);
 
 	if (wlan == '1')
 		return "<--->\0";
 	else {
-		west = fopen(ETH_CARFILE, "r");
-		wlan = (int)fgetc(west);
-		fclose(west);
+		carrier = fopen(ETH_CARFILE, "r");
+		wlan = (int)fgetc(carrier);
+		fclose(carrier);
 		if (wlan == '1')
 			return "[---]\0";
 		else
@@ -35,17 +37,17 @@ char *net(void) {
 long long unsigned int memused(void) {
 	FILE *meminfo;
 	meminfo = fopen(MEMINFOFILE, "r");
-	char buffer[128];
+	char buffer[48];
 	long long unsigned int memtotal, memfree, buffers, cached;
 
-	fgets(buffer, 128, meminfo);
+	fgets(buffer, 48, meminfo);
 	sscanf(buffer, "MemTotal: %32llu", &memtotal);
-	fgets(buffer, 128, meminfo);
+	fgets(buffer, 48, meminfo);
 	sscanf(buffer, "MemFree: %32llu", &memfree);
-	fgets(buffer, 128, meminfo);
-	fgets(buffer, 128, meminfo);
+	fgets(buffer, 48, meminfo);
+	fgets(buffer, 48, meminfo);
 	sscanf(buffer, "Buffers: %32llu", &buffers);
-	fgets(buffer, 128, meminfo);
+	fgets(buffer, 48, meminfo);
 	sscanf(buffer, "Cached: %32llu", &cached);
 	fclose(meminfo);
 	return (memtotal - memfree - buffers - cached) / 1024;
@@ -88,6 +90,8 @@ unsigned short power(void) {
 	else {
 		ac = fopen(BAT_CAPFILE, "r");
 		fscanf(ac, "%hu", &supply);
+		if (delay == 3)
+			delay = 5;
 		fclose(ac);
 		return supply;
 	}
@@ -130,9 +134,9 @@ char *unixtime(void) {
 }
 
 int main(void) {
+	sleep(delay);
 	printf("%s ┃ %lluMB ┃ %0.1fGHz ┃ [%u%%] ┃ Uptime: %u:%u ┃ %s",
 		net(), memused(), freq(), power(), uptime('h'), uptime('m'), unixtime());
-	sleep(3);
 	return 0;
 }
 
