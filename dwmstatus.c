@@ -7,9 +7,7 @@
 // #include <X11/Xlib.h>
 // #include <dirent.h>
 
-#include "config.h"
-
-unsigned int delay = 3;
+#include "dwmstatus.h"
 
 /* Network Connections */
 char *net(void) {
@@ -66,16 +64,31 @@ float freq(void) {
 }
 
 /* CPU (core0) temp */
-/*unsigned short temp(void) {
+unsigned short temp(void) {
 	FILE *temps;
 	unsigned int coretemp;
 
-	temps = fopen(CPU0TEMPFILE, "r");
+	temps = fopen(CPU_TEMPFILE, "r");
 	fscanf(temps, "%ud", &coretemp);
 	coretemp = coretemp * 0.001;
 	fclose(temps);
 	return coretemp;
-}*/
+}
+
+/* Volume */
+unsigned int volume(void) {
+	FILE *codec;
+	codec = fopen(SOUNDFILE, "r");
+	char buffer[64];
+	unsigned int hexvoll, hexvolr;
+
+	for (int i = 0; i < 41; i++)
+		fgets(buffer, 64, codec);
+	fgets(buffer, 64, codec);
+	sscanf(buffer, "  Amp-Out vals:  [%x %x]\n", &hexvoll, &hexvolr);
+	fclose(codec);
+	return hexvoll;
+}
 
 /* Power */
 unsigned short power(void) {
@@ -128,15 +141,15 @@ char *unixtime(void) {
 
 	time(&date);
 	tm_info = localtime(&date);
-	strftime(buffer, sizeof(buffer), "%A %d/%m %I:%M", tm_info);
+	strftime(buffer, sizeof(buffer), "%A %m/%d %I:%M", tm_info);
 
 	return buffer;
 }
 
 int main(void) {
 	sleep(delay);
-	printf("%s ┃ %lluMB ┃ %0.1fGHz ┃ [%u%%] ┃ Uptime: %u:%u ┃ %s",
-		net(), memused(), freq(), power(), uptime('h'), uptime('m'), unixtime());
+	printf("%s ┃ %lluMB ┃ %0.1fGHz ┃ %u°C ┃ vol: %X ┃ [%u%%] ┃ %u:%u ┃ %s",
+		net(), memused(), freq(), temp(), volume(), power(), uptime('h'), uptime('m'), unixtime());
 	return 0;
 }
 
