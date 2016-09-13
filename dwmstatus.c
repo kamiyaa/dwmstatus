@@ -3,12 +3,16 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <time.h>
+#include <dirent.h>
 
-// #include <X11/Xlib.h>
-// #include <dirent.h>
+/*
+ * #include <X11/Xlib.h>
+ * #include <dirent.h>
+ */
 
-#include "dwmstatus.h"
+#include "config.h"
 
+static unsigned int delay = 2;
 /* Network Connections */
 char *net(void) {
 	FILE *carrier;
@@ -32,23 +36,28 @@ char *net(void) {
 }
 
 /* Memory used */
-long long unsigned int memused(void) {
+unsigned int memused(void) {
 	FILE *meminfo;
 	meminfo = fopen(MEMINFOFILE, "r");
 	char buffer[48];
-	long long unsigned int memtotal, memfree, buffers, cached;
+	/* For people with more than 2047GB Ram */
+	/* long long unsigned int memtotal, memfree, buffers, cached; */
+	/* For the rest of us */
+	unsigned int memtotal, memfree, buffers, cached;
+
 
 	fgets(buffer, 48, meminfo);
-	sscanf(buffer, "MemTotal: %32llu", &memtotal);
+	sscanf(buffer, "MemTotal: %u", &memtotal);
 	fgets(buffer, 48, meminfo);
-	sscanf(buffer, "MemFree: %32llu", &memfree);
+	sscanf(buffer, "MemFree: %u", &memfree);
 	fgets(buffer, 48, meminfo);
 	fgets(buffer, 48, meminfo);
-	sscanf(buffer, "Buffers: %32llu", &buffers);
+	sscanf(buffer, "Buffers: %u", &buffers);
 	fgets(buffer, 48, meminfo);
-	sscanf(buffer, "Cached: %32llu", &cached);
+	sscanf(buffer, "Cached: %u", &cached);
 	fclose(meminfo);
-	return (memtotal - memfree - buffers - cached) / 1024;
+	unsigned int memused = (memtotal - memfree - buffers - cached) / 1024;
+	return memused;
 }
 
 /* CPU (core0) freq */
@@ -75,8 +84,8 @@ unsigned short temp(void) {
 	return coretemp;
 }
 
-/* Volume */
-unsigned int volume(void) {
+/* Volume (Hexadecimal) */
+/*unsigned int volume(void) {
 	FILE *codec;
 	codec = fopen(SOUNDFILE, "r");
 	char buffer[64];
@@ -88,30 +97,33 @@ unsigned int volume(void) {
 	sscanf(buffer, "  Amp-Out vals:  [%x %x]\n", &hexvoll, &hexvolr);
 	fclose(codec);
 	return hexvoll;
-}
+}*/
 
 /* Power */
 unsigned short power(void) {
-	FILE *ac;
-	unsigned short supply;
-
-	ac = fopen(AC_FILE, "r");
-	supply = fgetc(ac);
-	fclose(ac);
-	if (supply == 49)
-		return 0;
-	else {
+	DIR* dir = opendir(BAT_DIR);
+	unsigned short supply = 0;
+	if (dir) {
+		if (delay != 4)
+			delay = 4;
+		FILE *ac;
 		ac = fopen(BAT_CAPFILE, "r");
 		fscanf(ac, "%hu", &supply);
-		if (delay == 3)
-			delay = 5;
 		fclose(ac);
-		return supply;
 	}
+	closedir(dir);
+	return supply;
+/*	else {
+		ac = fopen(AC_FILE, "r");
+		supply = fgetc(ac);
+		fclose(ac);
+		if (supply == '1')
+			return 0;
+	} */
 }
 
 /* Uptime */
-unsigned int uptime(char hm) {
+/*unsigned int uptime(char hm) {
 	long long unsigned int timeup;
 	FILE *fuptime;
 
@@ -131,7 +143,7 @@ unsigned int uptime(char hm) {
 		return times[0];
 	else
 		return times[1];
-}
+}*/
 
 /* Date/time */
 char *unixtime(void) {
@@ -141,15 +153,15 @@ char *unixtime(void) {
 
 	time(&date);
 	tm_info = localtime(&date);
-	strftime(buffer, sizeof(buffer), "%A %m/%d %I:%M", tm_info);
+	strftime(buffer, sizeof(buffer), "%a  %m/%d  %I:%M", tm_info);
 
 	return buffer;
 }
 
 int main(void) {
 	sleep(delay);
-	printf("%s ┃ %lluMB ┃ %0.1fGHz ┃ %u°C ┃ vol: %X ┃ [%u%%] ┃ %u:%u ┃ %s",
-		net(), memused(), freq(), temp(), volume(), power(), uptime('h'), uptime('m'), unixtime());
+	printf("%s  \u2502  %uMB  \u2502  %0.1fGHz  \u2502  %u°C  \u2502  [%u%%]  \u2502  %s",
+		net(), memused(), freq(), temp(), power(), unixtime());
 	return 0;
 }
 
