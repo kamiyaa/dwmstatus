@@ -11,6 +11,8 @@ config:
 
 dwmstatus: dwmstatus.c Makefile
 	gcc -ggdb3 -O0 -Wall -Werror -Wno-unused-variable $(STD) dwmstatus.c -o dwmstatus
+devel: dwmstatus-devel.c Makefile
+	gcc -ggdb3 -O0 -Wall -Werror -Wno-unused-variable $(STD) dwmstatus-devel.c -o dwmstatus-devel
 
 
 USER = $(shell whoami)

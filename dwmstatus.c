@@ -1,9 +1,8 @@
-/* Version 0.05 */
+/* dwmstatus-0.06 */
 
 #include <stdio.h>
 #include <unistd.h>
 #include <time.h>
-#include <dirent.h>
 
 /*
  * #include <X11/Xlib.h>
@@ -12,7 +11,9 @@
 
 #include "config.h"
 
+/* statusbar pause duration */
 static unsigned int delay = 2;
+
 /* Network Connections */
 char *net(void) {
 	FILE *carrier;
@@ -101,25 +102,14 @@ unsigned short temp(void) {
 
 /* Power */
 unsigned short power(void) {
-	DIR* dir = opendir(BAT_DIR);
+	FILE *ac;
 	unsigned short supply = 0;
-	if (dir) {
-		if (delay != 4)
-			delay = 4;
-		FILE *ac;
+	if (fopen(BAT_CAPFILE, "r")) {
 		ac = fopen(BAT_CAPFILE, "r");
 		fscanf(ac, "%hu", &supply);
 		fclose(ac);
 	}
-	closedir(dir);
 	return supply;
-/*	else {
-		ac = fopen(AC_FILE, "r");
-		supply = fgetc(ac);
-		fclose(ac);
-		if (supply == '1')
-			return 0;
-	} */
 }
 
 /* Uptime */
@@ -161,17 +151,12 @@ char *unixtime(void) {
 int main(void) {
 	sleep(delay);
 	printf("%s  \u2502  %uMB  \u2502  %0.1fGHz  \u2502  %u°C  \u2502  [%u%%]  \u2502  %s",
-		net(), memused(), freq(), temp(), power(), unixtime());
+		net(),      memused(),    freq(),           temp(),        power(),       unixtime());
 	return 0;
 }
 
-//#include <sys/types.h>
-//#include <linux/sysinfo.h>
-
-//#define MB 1048576
-//#define GB 1073741824
-
-/*	Display *dpy;
+/*
+	Display *dpy;
 	Window root;
 	dpy = XOpenDisplay(NULL);
 	if (dpy == NULL) {
@@ -184,4 +169,5 @@ int main(void) {
 		XStoreName(dpy,root,status);
 		XFlush(dpy);
 		sleep(3);
-	}*/
+	}
+*/
