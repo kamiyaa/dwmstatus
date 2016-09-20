@@ -10,7 +10,6 @@ Features:
  - Displays uptime
 
  - Displays battery percentage
-   - only when unplugged
 
  - Displays memory used
    - will only display in Megabytes
