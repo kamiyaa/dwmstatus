@@ -1,7 +1,6 @@
 # Makefile
 
-#LIBS = -lX11
-STD = -std=c11
+include config.mk
 
 all: config dwmstatus
 
@@ -10,9 +9,9 @@ config:
 	cp config.def.h config.h
 
 dwmstatus: dwmstatus.c Makefile
-	gcc -ggdb3 -O0 -Wall -Werror -Wno-unused-variable $(STD) dwmstatus.c -o dwmstatus
+	${CC} ${CFLAGS} dwmstatus.c -o dwmstatus
 devel: dwmstatus-devel.c Makefile
-	gcc -ggdb3 -O0 -Wall -Werror -Wno-unused-variable $(STD) dwmstatus-devel.c -o dwmstatus-devel
+	${CC} ${CFLAGS} dwmstatus-devel.c -o dwmstatus-devel
 
 
 USER = $(shell whoami)
