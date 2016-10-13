@@ -1,10 +1,20 @@
 # dwmstatus
-A hardlinked status bar for dwm, written in C.
+## Description
+A hardlinked status bar for Dynamic Window Manager(dwm), written in C.
+
+## Usage
+To run, just execute the binary from a console:
+./dwmstatus
+
+## Configuration
+All configurations are done through config.def.h/config.h
+to keep the program simple and fast(?).
+
 
 Output should look something like this:
 <---> ┃ 427MB ┃ [0%] ┃ Uptime: 0:17 ┃ Monday 16/05 08:03
 
-Features:
+## Features
  - Displays date
 
  - Displays uptime
