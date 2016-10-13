@@ -9,6 +9,7 @@ config:
 	cp config.def.h config.h
 
 dwmstatus: dwmstatus.c Makefile
+	@echo ${CC} ${CFLAGS} dwmstatus.c -o dwmstatus
 	${CC} ${CFLAGS} dwmstatus.c -o dwmstatus
 devel: dwmstatus-devel.c Makefile
 	${CC} ${CFLAGS} dwmstatus-devel.c -o dwmstatus-devel

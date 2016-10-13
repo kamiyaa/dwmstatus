@@ -11,17 +11,22 @@
 
 #include "config.h"
 
-/* statusbar pause duration */
+/*
+ * The pause duration between each
+ * refresh of the statusbar
+ */
 static unsigned int delay = 2;
 
 /* Network Connections */
-char *net(void) {
+char *net(void)
+{
 	FILE *carrier;
-	char wlan;
+	unsigned char wlan;
 
 	carrier = fopen(WLAN_CARFILE, "r");
 	wlan = fgetc(carrier);
 	fclose(carrier);
+	char netstate[6];
 
 	if (wlan == '1')
 		return "<--->\0";
@@ -37,7 +42,8 @@ char *net(void) {
 }
 
 /* Memory used */
-unsigned int memused(void) {
+unsigned int memused(void)
+{
 	FILE *meminfo;
 	meminfo = fopen(MEMINFOFILE, "r");
 	char buffer[48];
@@ -62,7 +68,8 @@ unsigned int memused(void) {
 }
 
 /* CPU (core0) freq */
-float freq(void) {
+float freq(void)
+{
 	FILE *freq;
 	float corefreq;
 
@@ -74,7 +81,8 @@ float freq(void) {
 }
 
 /* CPU (core0) temp */
-unsigned short temp(void) {
+/*unsigned short temp(void)
+{
 	FILE *temps;
 	unsigned int coretemp;
 
@@ -83,10 +91,11 @@ unsigned short temp(void) {
 	coretemp = coretemp * 0.001;
 	fclose(temps);
 	return coretemp;
-}
+}*/
 
 /* Volume (Hexadecimal) */
-/*unsigned int volume(void) {
+/*unsigned int volume(void)
+{
 	FILE *codec;
 	codec = fopen(SOUNDFILE, "r");
 	char buffer[64];
@@ -101,10 +110,13 @@ unsigned short temp(void) {
 }*/
 
 /* Power */
-unsigned short power(void) {
+unsigned short power(void)
+{
 	FILE *ac;
 	unsigned short supply = 0;
 	if (fopen(BAT_CAPFILE, "r")) {
+		if (delay == 2)
+			delay = 6;
 		ac = fopen(BAT_CAPFILE, "r");
 		fscanf(ac, "%hu", &supply);
 		fclose(ac);
@@ -136,7 +148,8 @@ unsigned short power(void) {
 }*/
 
 /* Date/time */
-char *unixtime(void) {
+char *unixtime(void)
+{
 	static char buffer[22];
 	time_t date;
 	struct tm *tm_info;
@@ -150,8 +163,8 @@ char *unixtime(void) {
 
 int main(void) {
 	sleep(delay);
-	printf("%s  \u2502  %uMB  \u2502  %0.1fGHz  \u2502  %u°C  \u2502  [%u%%]  \u2502  %s",
-		net(),      memused(),    freq(),           temp(),        power(),       unixtime());
+	printf("%s  \u2502  %uMB  \u2502  %0.1fGHz  \u2502  [%u%%]  \u2502  %s ",
+		net(),      memused(),    freq(),            power(),       unixtime());
 	return 0;
 }
 
