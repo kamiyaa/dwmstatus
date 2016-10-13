@@ -10,10 +10,8 @@ config:
 
 dwmstatus: dwmstatus.c Makefile
 	@echo ${CC} ${CFLAGS} dwmstatus.c -o dwmstatus
-	${CC} ${CFLAGS} dwmstatus.c -o dwmstatus
-devel: dwmstatus-devel.c Makefile
-	${CC} ${CFLAGS} dwmstatus-devel.c -o dwmstatus-devel
-
+	${CC} ${CFLAGS} -c dwmstatus.c -o dwmstatus.o
+	${CC} ${CFLAGS} dwmstatus.o -o dwmstatus
 
 USER = $(shell whoami)
 install:

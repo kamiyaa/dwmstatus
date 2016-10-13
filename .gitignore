@@ -1,4 +1,5 @@
 *.o
 
-/dwmstatus
+/src/config.h
+/src/dwmstatus
 
