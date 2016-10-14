@@ -2,10 +2,15 @@
 ## Description
 A hardlinked status bar for Dynamic Window Manager(dwm), written in C.
 
-## Usage
-To run, just execute the binary from a console:
-./dwmstatus
+## Requirements
+ - clang/gcc
+ - linux sysfs info
+ - linux procfs info
 
+## Installation
+```
+make
+```
 ## Configuration
 All configurations are done through config.def.h/config.h
 to keep the program simple and fast(?).
