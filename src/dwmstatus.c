@@ -4,18 +4,9 @@
 #include <unistd.h>
 #include <time.h>
 
-/*
- * #include <X11/Xlib.h>
- * #include <dirent.h>
- */
-
 #include "config.h"
 
-/*
- * The pause duration between each
- * refresh of the statusbar
- */
-static unsigned int delay = 2;
+static unsigned int delay = 3;
 
 /* Network Connections */
 char *net(void)
@@ -115,12 +106,15 @@ unsigned short power(void)
 	FILE *ac;
 	unsigned short supply = 0;
 	if (fopen(BAT_CAPFILE, "r")) {
-		if (delay == 2)
-			delay = 6;
+		if (delay != 30)
+			delay = 30;
 		ac = fopen(BAT_CAPFILE, "r");
 		fscanf(ac, "%hu", &supply);
 		fclose(ac);
 	}
+	else if (delay != 3)
+		delay = 3;
+
 	return supply;
 }
 
@@ -162,25 +156,16 @@ char *unixtime(void)
 }
 
 int main(void) {
+	unsigned int battery_life = power();
+	if (delay > 5)
+		printf("%s  \u2502  [%u%%]  \u2502  %s ",
+			net(),       battery_life,       unixtime());
+	else
+		printf("%s  \u2502  %uMB  \u2502  %0.1fGHz  \u2502  [%u%%]  \u2502  %s ",
+			net(),      memused(),    freq(),            battery_life,       unixtime());
 	sleep(delay);
-	printf("%s  \u2502  %uMB  \u2502  %0.1fGHz  \u2502  [%u%%]  \u2502  %s ",
-		net(),      memused(),    freq(),            power(),       unixtime());
+
 	return 0;
 }
 
-/*
-	Display *dpy;
-	Window root;
-	dpy = XOpenDisplay(NULL);
-	if (dpy == NULL) {
-		fprintf(stderr, "ERROR: could not open display\n");
-		return 1;
-	}
-	root = XRootWindow(dpy,DefaultScreen(dpy));
-	for (;;) {
-		sprintf(status, "%s ┃ %lluMB ┃ [%u%%] ┃ Uptime: %u:%u ┃ %s", net(), memused(), power(), uptime('h'), uptime('m'), unixtime());
-		XStoreName(dpy,root,status);
-		XFlush(dpy);
-		sleep(3);
-	}
-*/
+
