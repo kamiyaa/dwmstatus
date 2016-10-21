@@ -106,7 +106,12 @@ unsigned short power(void)
 	FILE *ac;
 	unsigned short supply = 0;
 	if (fopen(BAT_CAPFILE, "r")) {
-		if (delay != 30)
+		ac = fopen(AC_FILE, "r");
+		char ac_on = fgetc(ac);
+		fclose(ac);
+		if (ac_on == '1')
+			delay = 3;
+		else if (delay != 30)
 			delay = 30;
 		ac = fopen(BAT_CAPFILE, "r");
 		fscanf(ac, "%hu", &supply);
