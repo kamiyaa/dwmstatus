@@ -15,25 +15,27 @@ char *net(void)
 	unsigned char wlan;
 
 	carrier = fopen(WLAN_CARFILE, "r");
-	wlan = fgetc(carrier);
-	fclose(carrier);
-	char netstate[6];
 
-	if (wlan == '1')
-		return "<--->\0";
-	else {
+	if (carrier) {
+		wlan = fgetc(carrier);
+		fclose(carrier);
+		if (wlan == '1')
+			return "<--->\0";
+	}
+
+	else if (fopen(ETH_CARFILE, "r")) {
 		carrier = fopen(ETH_CARFILE, "r");
-		wlan = (int)fgetc(carrier);
+		wlan = fgetc(carrier);
 		fclose(carrier);
 		if (wlan == '1')
 			return "[---]\0";
-		else
-			return "--/--\0";
 	}
+
+	return "--/--\0";
 }
 
 /* Memory used */
-unsigned int memused(void)
+unsigned int mem_actively_used(void)
 {
 	FILE *meminfo;
 	meminfo = fopen(MEMINFOFILE, "r");
@@ -57,6 +59,30 @@ unsigned int memused(void)
 	unsigned int memused = (memtotal - memfree - buffers - cached) / 1024;
 	return memused;
 }
+
+
+/* Memory used */
+unsigned int mem_total_used(void)
+{
+	FILE *meminfo;
+	meminfo = fopen(MEMINFOFILE, "r");
+	char buffer[48];
+	/* For people with more than 2047GB Ram */
+	/* long long unsigned int memtotal, memfree, buffers, cached; */
+	/* For the rest of us */
+	unsigned int memtotal, memfree, buffers, cached;
+
+
+	fgets(buffer, 48, meminfo);
+	sscanf(buffer, "MemTotal: %u", &memtotal);
+	fgets(buffer, 48, meminfo);
+	sscanf(buffer, "MemFree: %u", &memfree);
+	fgets(buffer, 48, meminfo);
+	fclose(meminfo);
+	unsigned int mem_used = (memtotal - memfree) / 1024;
+	return mem_used;
+}
+
 
 /* CPU (core0) freq */
 float freq(void)
@@ -167,7 +193,7 @@ int main(void) {
 			net(),       battery_life,       unixtime());
 	else
 		printf("%s  \u2502  %uMB  \u2502  %0.1fGHz  \u2502  [%u%%]  \u2502  %s ",
-			net(),      memused(),    freq(),            battery_life,       unixtime());
+			net(),  mem_total_used(), freq(),            battery_life,       unixtime());
 	sleep(delay);
 
 	return 0;

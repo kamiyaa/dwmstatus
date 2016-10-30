@@ -17,9 +17,13 @@ dwmstatus: dwmstatus.c Makefile
 	@${CC} ${CFLAGS} dwmstatus.o -o dwmstatus
 
 USER = $(shell whoami)
+
 install:
-	rm -vrf /tmp/$(USER)
-	mkdir -v /tmp/$(USER)
+	mkdir /tmp/$(USER)
 	cp -v dwmstatus /tmp/$(USER)/dwmstatus
+
+uninstall:
+	rm -iv /tmp/$(USER)/dwmstatus
+
 clean:
 	rm -f *.o dwmstatus
