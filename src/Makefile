@@ -16,14 +16,8 @@ dwmstatus: dwmstatus.c Makefile
 	@echo "    CC      dwmstatus"
 	@${CC} ${CFLAGS} dwmstatus.o -o dwmstatus
 
-USER = $(shell whoami)
-
 install:
-	mkdir /tmp/$(USER)
-	cp -v dwmstatus /tmp/$(USER)/dwmstatus
-
-uninstall:
-	rm -iv /tmp/$(USER)/dwmstatus
+	cp dwmstatus /usr/local/bin/dwmstatus
 
 clean:
 	rm -f *.o dwmstatus

@@ -6,23 +6,28 @@
 
 #include "config.h"
 
+/* Status bar refresh rate */
 static unsigned int delay = 3;
 
 /* Network Connections */
-char *net(void)
+char *get_net_carrier(void)
 {
+	/* Open up the wireless interface carrier file to check if
+	 * it is connected to a network.
+	 *
+	 */
 	FILE *carrier;
+	carrier = fopen(WLAN_CARFILE, "r");
 	unsigned char wlan;
 
-	carrier = fopen(WLAN_CARFILE, "r");
-
+	/* If the file exists, get and return its state */
 	if (carrier) {
 		wlan = fgetc(carrier);
 		fclose(carrier);
 		if (wlan == '1')
 			return "<--->\0";
 	}
-
+	/* Else, check if the wired interface carrier file exists */
 	else if (fopen(ETH_CARFILE, "r")) {
 		carrier = fopen(ETH_CARFILE, "r");
 		wlan = fgetc(carrier);
@@ -35,7 +40,7 @@ char *net(void)
 }
 
 /* Memory used */
-unsigned int mem_actively_used(void)
+void get_meminfo(unsigned int *list)
 {
 	FILE *meminfo;
 	meminfo = fopen(MEMINFOFILE, "r");
@@ -45,55 +50,41 @@ unsigned int mem_actively_used(void)
 	/* For the rest of us */
 	unsigned int memtotal, memfree, buffers, cached;
 
-
+	/* Get the system memory amount */
 	fgets(buffer, 48, meminfo);
 	sscanf(buffer, "MemTotal: %u", &memtotal);
+	/* Get the amount of memory free */
 	fgets(buffer, 48, meminfo);
 	sscanf(buffer, "MemFree: %u", &memfree);
 	fgets(buffer, 48, meminfo);
 	fgets(buffer, 48, meminfo);
+	/* Get the amount of buffers are being used */
 	sscanf(buffer, "Buffers: %u", &buffers);
 	fgets(buffer, 48, meminfo);
+	/* Get the amount of cache is being used */
 	sscanf(buffer, "Cached: %u", &cached);
 	fclose(meminfo);
-	unsigned int memused = (memtotal - memfree - buffers - cached) / 1024;
-	return memused;
-}
-
-
-/* Memory used */
-unsigned int mem_total_used(void)
-{
-	FILE *meminfo;
-	meminfo = fopen(MEMINFOFILE, "r");
-	char buffer[48];
-	/* For people with more than 2047GB Ram */
-	/* long long unsigned int memtotal, memfree, buffers, cached; */
-	/* For the rest of us */
-	unsigned int memtotal, memfree, buffers, cached;
-
-
-	fgets(buffer, 48, meminfo);
-	sscanf(buffer, "MemTotal: %u", &memtotal);
-	fgets(buffer, 48, meminfo);
-	sscanf(buffer, "MemFree: %u", &memfree);
-	fgets(buffer, 48, meminfo);
-	fclose(meminfo);
-	unsigned int mem_used = (memtotal - memfree) / 1024;
-	return mem_used;
+	/* Get the amount of active memory */
+	list[0] = (memtotal - memfree - buffers - cached) / 1024;
+	/* Get the amount of total memory used */
+	list[1] = (memtotal - memfree) / 1024;
 }
 
 
 /* CPU (core0) freq */
 float freq(void)
 {
+	/* Open up core0 frequency sysfs file for parsing current
+	 * frequency
+	 */
 	FILE *freq;
-	float corefreq;
-
 	freq = fopen(CPU_FREQFILE, "r");
+
+	float corefreq;
 	fscanf(freq, "%f", &corefreq);
-	corefreq = corefreq * 0.000001;
 	fclose(freq);
+	/* Format the frequency to GHz */
+	corefreq = corefreq * 0.000001;
 	return corefreq;
 }
 
@@ -129,14 +120,21 @@ float freq(void)
 /* Power */
 unsigned short power(void)
 {
+	/* Open up the sysfs file for AC power */
 	FILE *ac;
 	unsigned short supply = 0;
 	if (fopen(BAT_CAPFILE, "r")) {
 		ac = fopen(AC_FILE, "r");
 		char ac_on = fgetc(ac);
 		fclose(ac);
+		/* If connected to AC, refresh rate will be set to 3
+		 * seconds
+		 */
 		if (ac_on == '1')
 			delay = 3;
+		/* Else, change the refresh rate to 30 seconds to save
+		 * battery
+		 */
 		else if (delay != 30)
 			delay = 30;
 		ac = fopen(BAT_CAPFILE, "r");
@@ -181,19 +179,24 @@ char *unixtime(void)
 
 	time(&date);
 	tm_info = localtime(&date);
-	strftime(buffer, sizeof(buffer), "%a  %m/%d  %I:%M", tm_info);
+	strftime(buffer, sizeof(buffer), "%a %m/%d  %I:%M", tm_info);
 
 	return buffer;
 }
 
 int main(void) {
 	unsigned int battery_life = power();
-	if (delay > 5)
-		printf("%s  \u2502  [%u%%]  \u2502  %s ",
-			net(),       battery_life,       unixtime());
-	else
-		printf("%s  \u2502  %uMB  \u2502  %0.1fGHz  \u2502  [%u%%]  \u2502  %s ",
-			net(),  mem_total_used(), freq(),            battery_life,       unixtime());
+
+	if (delay > 5) {
+		printf("%s \u2502 [%u%%] \u2502 %s \n",
+			get_net_carrier(), battery_life, unixtime());
+	}
+	else {
+		unsigned int ram_usage[2];
+		get_meminfo(ram_usage);
+		printf("%s \u2502 %uMB/%uMB \u2502 %0.1fGHz \u2502 [%u%%] \u2502 %s \n",
+			get_net_carrier(), ram_usage[0], ram_usage[1], freq(), battery_life, unixtime());
+	}
 	sleep(delay);
 
 	return 0;
