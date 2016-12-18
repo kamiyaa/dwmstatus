@@ -6,9 +6,6 @@
 
 #include "config.h"
 
-/* Status bar refresh rate */
-static unsigned int delay = 3;
-
 /* Network Connections */
 char *get_net_carrier(void)
 {
