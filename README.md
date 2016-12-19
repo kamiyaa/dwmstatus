@@ -9,6 +9,8 @@ A hardlinked status bar for Dynamic Window Manager(dwm), written in C.
 
 ## Installation
 ```
+git clone git@github.com:Kamiyaa/dwmstatus.git
+cd dwmstatus/src
 make
 ```
 ## Configuration
