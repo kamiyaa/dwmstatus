@@ -4,8 +4,10 @@ A hardlinked status bar for Dynamic Window Manager(dwm), written in C.
 
 ## Requirements
  - clang/gcc
- - linux sysfs info
- - linux procfs info
+ - Kernel options:
+  - Expose thermal sensors as hwmon device (CONFIG_THERMAL_HWMON) [For getting cpu temps]
+  - sysfs file system support (CONFIG_SYSFS) [Where most information will be parsed from]
+  - /proc file system support (CONFIG_PROC_FS) [For memory, uptime and audio info]
 
 ## Installation
 ```
@@ -20,7 +22,8 @@ Note: some functions may be commented from my usages.
 Uncomment to use them.
 
 Output should look something like this:
-<---> ┃ 427MB ┃ [0%] ┃ Uptime: 0:17 ┃ Monday 16/05 08:03
+
+<---> │ 624MB/1444MB │ 0.5GHz │ [0%] │ Mon 01/02  10:19
 
 ## Features
  - Displays date
