@@ -1,5 +1,5 @@
 /* Status bar refresh rate */
-static unsigned int delay = 3;
+static unsigned int status_rrate = 3;
 
 /* Hardcoded file locations */
 #define AC_FILE		"/sys/class/power_supply/AC/online"			/* File stating if connection to AC is present */

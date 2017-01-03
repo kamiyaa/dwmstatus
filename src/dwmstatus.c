@@ -117,31 +117,33 @@ float freq(void)
 /* Power */
 unsigned short power(void)
 {
-	/* Open up the sysfs file for AC power */
-	FILE *ac;
-	unsigned short supply = 0;
-	if (fopen(BAT_CAPFILE, "r")) {
-		ac = fopen(AC_FILE, "r");
-		char ac_on = fgetc(ac);
-		fclose(ac);
+	/* Open up the sysfs file for battery info */
+	FILE *power_file;
+	power_file = fopen(BAT_CAPFILE, "r");
+	unsigned short battery_charge = 0;
+	/* If battery exists get battery charge*/
+	if (power_file) {
+		fscanf(power_file, "%hu", &battery_charge);
+		fclose(power_file);
+		power_file = fopen(AC_FILE, "r");
+		char ac_on = fgetc(power_file);
+		fclose(power_file);
 		/* If connected to AC, refresh rate will be set to 3
 		 * seconds
 		 */
 		if (ac_on == '1')
-			delay = 3;
+			status_rrate = 3;
 		/* Else, change the refresh rate to 30 seconds to save
 		 * battery
 		 */
-		else if (delay != 30)
-			delay = 30;
-		ac = fopen(BAT_CAPFILE, "r");
-		fscanf(ac, "%hu", &supply);
-		fclose(ac);
+		else if (status_rrate != 30)
+			status_rrate = 30;
 	}
-	else if (delay != 3)
-		delay = 3;
+	/* We must be connected to ac then */
+	else if (status_rrate != 3)
+		status_rrate = 3;
 
-	return supply;
+	return battery_charge;
 }
 
 /* Uptime */
@@ -184,7 +186,7 @@ char *unixtime(void)
 int main(void) {
 	unsigned int battery_life = power();
 
-	if (delay > 5) {
+	if (status_rrate > 5) {
 		printf("%s \u2502 [%u%%] \u2502 %s \n",
 			get_net_carrier(), battery_life, unixtime());
 	}
@@ -194,7 +196,7 @@ int main(void) {
 		printf("%s \u2502 %uMB/%uMB \u2502 %0.1fGHz \u2502 [%u%%] \u2502 %s \n",
 			get_net_carrier(), ram_usage[0], ram_usage[1], freq(), battery_life, unixtime());
 	}
-	sleep(delay);
+	sleep(status_rrate);
 
 	return 0;
 }
