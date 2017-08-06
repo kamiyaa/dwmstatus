@@ -4,11 +4,11 @@ include config.mk
 
 all: config dwmstatus
 
-config:
+config: config.def.h
 	@echo creating config.h from config.def.h
 	@cp config.def.h config.h
 
-dwmstatus: dwmstatus.c Makefile
+dwmstatus: config.def.h dwmstatus.c Makefile
 	@echo "    CC = ${CC}"
 	@echo "CFLAGS = ${CFLAGS}"
 	@echo "    CC      dwmstatus.o"

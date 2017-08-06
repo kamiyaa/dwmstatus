@@ -4,6 +4,10 @@
 #include <unistd.h>
 #include <time.h>
 
+#include <linux/unistd.h>
+#include <linux/kernel.h>
+#include <sys/sysinfo.h>
+
 #include "config.h"
 
 /* Network Connections */
@@ -13,38 +17,37 @@ char *get_net_carrier(void)
 	 * it is connected to a network.
 	 *
 	 */
-	FILE *carrier;
-	carrier = fopen(WLAN_CARFILE, "r");
-	unsigned char wlan;
+	FILE *carrier_fd;
+	carrier_fd = fopen(WLAN_CARFILE, "r");
+	unsigned char iface_status;
 
 	/* If the file exists, get and return its state */
-	if (carrier) {
-		wlan = fgetc(carrier);
-		fclose(carrier);
-		if (wlan == '1')
+	if (carrier_fd) {
+		iface_status = fgetc(carrier_fd);
+		fclose(carrier_fd);
+		if (iface_status == '1')
 			return "<--->\0";
 	}
 	/* Else, check if the wired interface carrier file exists */
-	else if (fopen(ETH_CARFILE, "r")) {
-		carrier = fopen(ETH_CARFILE, "r");
-		wlan = fgetc(carrier);
-		fclose(carrier);
-		if (wlan == '1')
-			return "[---]\0";
+	else {
+		carrier_fd = fopen(ETH_CARFILE, "r");
+        	if (carrier_fd) {
+    			iface_status = fgetc(carrier_fd);
+		    	fclose(carrier_fd);
+		    	if (iface_status == '1')
+		    		return "[---]\0";
+	        }
 	}
-
 	return "--/--\0";
 }
 
 /* Memory used */
-void get_meminfo(unsigned int *list)
+unsigned int get_meminfo(void)
 {
 	FILE *meminfo;
 	meminfo = fopen(MEMINFOFILE, "r");
 	char buffer[48];
-	/* For people with more than 2047GB Ram */
-	/* long long unsigned int memtotal, memfree, buffers, cached; */
-	/* For the rest of us */
+	/* for memory total, memory free, buffers and cached */
 	unsigned int memtotal, memfree, buffers, cached;
 
 	/* Get the system memory amount */
@@ -56,50 +59,50 @@ void get_meminfo(unsigned int *list)
 	fgets(buffer, 48, meminfo);
 	fgets(buffer, 48, meminfo);
 	/* Get the amount of buffers are being used */
-	sscanf(buffer, "Buffers: %u", &buffers);
+//	sscanf(buffer, "Buffers: %u", &buffers);
 	fgets(buffer, 48, meminfo);
 	/* Get the amount of cache is being used */
 	sscanf(buffer, "Cached: %u", &cached);
 	fclose(meminfo);
 	/* Get the amount of active memory */
-	list[0] = (memtotal - memfree - buffers - cached) / 1024;
+//	list[0] = (memtotal - memfree - buffers - cached) / 1024;
 	/* Get the amount of total memory used */
-	list[1] = (memtotal - memfree) / 1024;
+	return (memtotal - memfree - cached) / 1024;
 }
 
 
 /* CPU (core0) freq */
-float freq(void)
+float get_freq(void)
 {
 	/* Open up core0 frequency sysfs file for parsing current
 	 * frequency
 	 */
-	FILE *freq;
-	freq = fopen(CPU_FREQFILE, "r");
+	FILE *freq_fd;
+    freq_fd = fopen(CPU_FREQFILE, "r");
 
 	float corefreq;
-	fscanf(freq, "%f", &corefreq);
-	fclose(freq);
+	fscanf(freq_fd, "%f", &corefreq);
+	fclose(freq_fd);
 	/* Format the frequency to GHz */
 	corefreq = corefreq * 0.000001;
 	return corefreq;
 }
 
 /* CPU (core0) temp */
-/*unsigned short temp(void)
+unsigned short get_temp(void)
 {
 	FILE *temps;
 	unsigned int coretemp;
 
 	temps = fopen(CPU_TEMPFILE, "r");
 	fscanf(temps, "%ud", &coretemp);
-	coretemp = coretemp * 0.001;
 	fclose(temps);
+	coretemp = coretemp * 0.001;
 	return coretemp;
-}*/
+}
 
 /* Volume (Hexadecimal) */
-/*unsigned int volume(void)
+unsigned int volume(void)
 {
 	FILE *codec;
 	codec = fopen(SOUNDFILE, "r");
@@ -112,22 +115,22 @@ float freq(void)
 	sscanf(buffer, "  Amp-Out vals:  [%x %x]\n", &hexvoll, &hexvolr);
 	fclose(codec);
 	return hexvoll;
-}*/
+}
 
 /* Power */
 unsigned short power(void)
 {
 	/* Open up the sysfs file for battery info */
-	FILE *power_file;
-	power_file = fopen(BAT_CAPFILE, "r");
+	FILE *power_fd;
+	power_fd = fopen(BAT_CAPFILE, "r");
 	unsigned short battery_charge = 0;
 	/* If battery exists get battery charge*/
-	if (power_file) {
-		fscanf(power_file, "%hu", &battery_charge);
-		fclose(power_file);
-		power_file = fopen(AC_FILE, "r");
-		char ac_on = fgetc(power_file);
-		fclose(power_file);
+	if (power_fd) {
+		fscanf(power_fd, "%hu", &battery_charge);
+		fclose(power_fd);
+		power_fd = fopen(AC_FILE, "r");
+		char ac_on = fgetc(power_fd);
+		fclose(power_fd);
 		/* If connected to AC, refresh rate will be set to 3
 		 * seconds
 		 */
@@ -147,28 +150,14 @@ unsigned short power(void)
 }
 
 /* Uptime */
-/*unsigned int uptime(char hm) {
-	long long unsigned int timeup;
-	FILE *fuptime;
-
-	fuptime = fopen(UPTIMEFILE, "r");
-	char buffer[16];
-	fgets(buffer, 16, fuptime);
-	sscanf(buffer, "%32llu", &timeup);
-	fclose(fuptime);
-	unsigned int times[2];
-	times[0] = 0;
-	if (timeup > 3600) {
-		times[0] = timeup / 3600;
-		timeup = timeup - 3600 * times[0];
+long get_uptime(void) {
+	struct sysinfo s_info;
+	int error = sysinfo(&s_info);
+	if (error != 0) {
+		printf("code error = %d\n", error);
 	}
-	times[1] = timeup / 60;
-	if (hm == 'h')
-		return times[0];
-	else
-		return times[1];
-}*/
-
+	return s_info.uptime;
+}
 /* Date/time */
 char *unixtime(void)
 {
@@ -176,9 +165,10 @@ char *unixtime(void)
 	time_t date;
 	struct tm *tm_info;
 
+	char *format = "%a %m/%d  %I:%M";
 	time(&date);
 	tm_info = localtime(&date);
-	strftime(buffer, sizeof(buffer), "%a %m/%d  %I:%M", tm_info);
+	strftime(buffer, sizeof(buffer), format, tm_info);
 
 	return buffer;
 }
@@ -186,15 +176,19 @@ char *unixtime(void)
 int main(void) {
 	unsigned int battery_life = power();
 
+	long uptime = get_uptime() / 60;
+
 	if (status_rrate > 5) {
-		printf("%s \u2502 [%u%%] \u2502 %s \n",
-			get_net_carrier(), battery_life, unixtime());
+//		printf("%s \u2502 %uMB \u2502 %u°C \u2502 [%u%%] \u2502 %s \n",
+//			get_net_carrier(), get_meminfo(), get_temp(), battery_life, unixtime());
+		printf("%s \u2502 %u°C \u2502 [%u%%] \u2502 %s \n",
+			get_net_carrier(), get_temp(), battery_life, unixtime());
 	}
 	else {
-		unsigned int ram_usage[2];
-		get_meminfo(ram_usage);
-		printf("%s \u2502 %uMB/%uMB \u2502 %0.1fGHz \u2502 [%u%%] \u2502 %s \n",
-			get_net_carrier(), ram_usage[0], ram_usage[1], freq(), battery_life, unixtime());
+		unsigned int up_hours = uptime / 60;
+		unsigned int up_minutes = uptime % 60;
+		printf("%s \u2502 %0.1fGHz \u2502 %u°C \u2502 [%u%%] \u2502 %d:%d \u2502 %s \n",
+			get_net_carrier(), get_freq(), get_temp(), battery_life, up_hours, up_minutes, unixtime());
 	}
 	sleep(status_rrate);
 
