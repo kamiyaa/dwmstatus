@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <time.h>
-#include <string.h>
+#include <signal.h>
 
 #include <linux/unistd.h>
 #include <linux/kernel.h>
@@ -17,6 +17,8 @@
 
 
 static struct sysinfo s_info;
+static unsigned short keep_running = 1;
+static xcb_connection_t *connection;
 
 void initialize_sysinfo(void)
 {
@@ -199,11 +201,23 @@ char *unixtime(void)
 	return buffer;
 }
 
-int main(void) {
+/**
+ * handles all memory cleanups when program is told to stop
+ */
+void exit_cleanup(int opt_code)
+{
+	keep_running = 0;
+	/* disconnect from X server */
+	xcb_disconnect(connection);
+}
+
+
+int main(void)
+{
 	/* display number */
 	int screen_default_nbr;
 	/* connect to display */
-	xcb_connection_t *connection = xcb_connect(NULL, &screen_default_nbr);
+	connection = xcb_connect(NULL, &screen_default_nbr);
 
 	/* get the screen and the root window */
 	xcb_screen_t *screen = xcb_setup_roots_iterator(xcb_get_setup(connection)).data;
@@ -229,7 +243,9 @@ int main(void) {
 	unsigned short status_len = 70;
 	char status[status_len];
 
-	for (;;sleep(status_rrate)) {
+	signal(SIGINT, exit_cleanup);
+
+	while (keep_running) {
 		/* setup sysinfo with values */
 		initialize_sysinfo();
 
@@ -269,12 +285,13 @@ int main(void) {
 			8,
 			status_len,
 			status);
+
 		/* update display */
 		xcb_flush(connection);
-	}
 
-	free(status);
-	xcb_disconnect(connection);
+		/* refresh rate */
+		sleep(status_rrate);
+	}
 
 	return 0;
 }
