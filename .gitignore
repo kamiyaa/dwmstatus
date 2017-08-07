@@ -1,6 +1,6 @@
 *.o
 *~
 *.sh
-/src/config.h
-/src/dwmstatus
+src/config.h
+src/dwmstatus
 
