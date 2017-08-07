@@ -10,7 +10,16 @@
 
 #include "config.h"
 
+
 static struct sysinfo s_info;
+
+void initialize_sysinfo(void)
+{
+	int error = sysinfo(&s_info);
+	if (error)
+		printf("Error: error code: %d\n", error);
+}
+
 
 /**
  * get the connectivity of network interfaces and return string
@@ -165,16 +174,12 @@ unsigned short get_power(void)
  */
 long get_uptime(void)
 {
-	int error = sysinfo(&s_info);
-	if (error != 0) {
-		printf("code error = %d\n", error);
-	}
 	return s_info.uptime;
 }
 
 /**
  * get and return an array of chars representing the time of the system:
- * day_of_week month/day hour:minutes
+ * day_of_week month/day  hour:minutes
  */
 char *unixtime(void)
 {
@@ -191,11 +196,14 @@ char *unixtime(void)
 }
 
 int main(void) {
+	initialize_sysinfo();
+
 	/* get the battery life */
 	unsigned int battery_life = get_power();
 
 	/* get the uptime of machine in minutes */
 	long uptime = get_uptime() / 60;
+
 	/* format the uptime into minutes */
 	unsigned int up_hours = uptime / 60;
 	unsigned int up_minutes = uptime % 60;
@@ -211,12 +219,12 @@ int main(void) {
 
 	/* if update delay is greater than 5, then we are on battery mode */
 	if (status_rrate > 5) {
-		printf("%s \u2502 %u°C \u2502 [%u%%] \u2502 %d:%d \u2502 %s \n",
+		printf("%s \u2502 %u\u00B0C \u2502 [%u%%] \u2502 %d:%d \u2502 %s \n",
 			net_status, cpu_temp, battery_life, up_hours, up_minutes, system_time);
 	}
 	/* otherwise, we are in normal mode */
 	else {
-		printf("%s \u2502 %0.1fGHz \u2502 %u°C \u2502 [%u%%] \u2502 %d:%d \u2502 %s \n",
+		printf("%s \u2502 %0.1fGHz \u2502 %u\u00B0C \u2502 [%u%%] \u2502 %d:%d \u2502 %s \n",
 			net_status, get_freq(), cpu_temp, battery_life, up_hours, up_minutes, system_time);
 	}
 	sleep(status_rrate);
