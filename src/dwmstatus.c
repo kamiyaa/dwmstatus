@@ -1,12 +1,17 @@
 /* dwmstatus-0.06 */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <time.h>
+#include <string.h>
 
 #include <linux/unistd.h>
 #include <linux/kernel.h>
 #include <sys/sysinfo.h>
+
+#include <xcb/xcb.h>
+#include <xcb/xcb_atom.h>
 
 #include "config.h"
 
@@ -19,7 +24,6 @@ void initialize_sysinfo(void)
 	if (error)
 		printf("Error: error code: %d\n", error);
 }
-
 
 /**
  * get the connectivity of network interfaces and return string
@@ -48,12 +52,12 @@ char *get_network_status(void)
 	/* Else, check if the wired interface carrier file exists */
 	else {
 		carrier_fd = fopen(ETH_CARFILE, "r");
-        	if (carrier_fd) {
+		if (carrier_fd) {
     			iface_status = fgetc(carrier_fd);
 		    	fclose(carrier_fd);
 		    	if (iface_status == '1')
 		    		return "[---]\0";
-	        }
+		}
 	}
 	return "--/--\0";
 }
@@ -196,38 +200,81 @@ char *unixtime(void)
 }
 
 int main(void) {
-	initialize_sysinfo();
+	/* display number */
+	int screen_default_nbr;
+	/* connect to display */
+	xcb_connection_t *connection = xcb_connect(NULL, &screen_default_nbr);
+
+	/* get the screen and the root window */
+	xcb_screen_t *screen = xcb_setup_roots_iterator(xcb_get_setup(connection)).data;
+	xcb_window_t root_window = 0;
+	if (screen) {
+		root_window = screen->root;
+	}
 
 	/* get the battery life */
-	unsigned int battery_life = get_power();
-
+	unsigned int battery_life;
 	/* get the uptime of machine in minutes */
-	long uptime = get_uptime() / 60;
-
+	long uptime;
 	/* format the uptime into minutes */
-	unsigned int up_hours = uptime / 60;
-	unsigned int up_minutes = uptime % 60;
-
+	unsigned int up_hours;
+	unsigned int up_minutes;
 	/* get the network status */
-	char *net_status = get_network_status();
-
+	char *net_status;
 	/* get the system time */
-	char *system_time = unixtime();
-
+	char *system_time;
 	/* get the temperature of cpu */
-	unsigned short cpu_temp = get_temp();
+	unsigned short cpu_temp;
 
-	/* if update delay is greater than 5, then we are on battery mode */
-	if (status_rrate > 5) {
-		printf("%s \u2502 %u\u00B0C \u2502 [%u%%] \u2502 %d:%d \u2502 %s \n",
-			net_status, cpu_temp, battery_life, up_hours, up_minutes, system_time);
+	unsigned short status_len = 70;
+	char status[status_len];
+
+	for (;;sleep(status_rrate)) {
+		/* setup sysinfo with values */
+		initialize_sysinfo();
+
+		/* get the battery life */
+		battery_life = get_power();
+		/* get the uptime of machine in minutes */
+		uptime = get_uptime() / 60;
+		/* format the uptime into minutes */
+		up_hours = uptime / 60;
+		up_minutes = uptime % 60;
+		/* get the network status */
+		net_status = get_network_status();
+		/* get the system time */
+		system_time = unixtime();
+		/* get the temperature of cpu */
+		cpu_temp = get_temp();
+
+		/* if update delay is greater than 5, then we are on battery mode */
+		if (status_rrate > 5) {
+			snprintf(status, status_len,
+				"%s \u2502 %u\u00B0C \u2502 [%u%%] \u2502 %d:%d \u2502 %s ",
+				net_status, cpu_temp, battery_life, up_hours, up_minutes, system_time);
+		}
+		/* otherwise, we are in normal mode */
+		else {
+			snprintf(status, status_len,
+				"%s \u2502 %0.1fGHz \u2502 %u\u00B0C \u2502 [%u%%] \u2502 %d:%d \u2502 %s ",
+				net_status, get_freq(), cpu_temp, battery_life, up_hours, up_minutes, system_time);
+		}
+
+		/* changed root window name */
+		xcb_change_property(connection,
+			XCB_PROP_MODE_REPLACE,
+			root_window,
+			XCB_ATOM_WM_NAME,
+			XCB_ATOM_STRING,
+			8,
+			status_len,
+			status);
+		/* update display */
+		xcb_flush(connection);
 	}
-	/* otherwise, we are in normal mode */
-	else {
-		printf("%s \u2502 %0.1fGHz \u2502 %u\u00B0C \u2502 [%u%%] \u2502 %d:%d \u2502 %s \n",
-			net_status, get_freq(), cpu_temp, battery_life, up_hours, up_minutes, system_time);
-	}
-	sleep(status_rrate);
+
+	free(status);
+	xcb_disconnect(connection);
 
 	return 0;
 }
