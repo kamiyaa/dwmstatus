@@ -2,6 +2,6 @@
 CC = clang
 
 # flags
-CFLAGS = -ggdb3 -O2 -Wall -Werror -Wno-unused-variable -march=native
+CFLAGS = -ggdb3 -O0 -Wall -Werror -Wno-unused-variable -march=native
 
-LIBS = -lX11 `pkg-config --cflags --libs xcb xcb-atom`
+LIBS = `pkg-config --cflags --libs xcb xcb-atom`
