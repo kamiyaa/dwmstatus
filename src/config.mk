@@ -1,7 +1,7 @@
 # compiler and linker
-CC = clang
+CC = cc
 
 # flags
-CFLAGS = -ggdb3 -O0 -Wall -Werror -Wno-unused-variable -march=native
+CFLAGS = -ggdb3 -Os -Wall -Werror -Wno-unused-variable -march=native -fno-stack-protector
 
 LIBS = `pkg-config --cflags --libs xcb xcb-atom`
