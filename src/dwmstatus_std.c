@@ -101,7 +101,7 @@ float get_freq(void)
 	freq_fd = fopen(CPU_FREQFILE, "r");
 
 	float corefreq;
-	fscanf(freq_fd, "%f", &corefreq);
+	unsigned short retval = fscanf(freq_fd, "%f", &corefreq);
 	fclose(freq_fd);
 	/* Format the frequency to GHz */
 	corefreq = corefreq * 0.000001;
@@ -117,7 +117,7 @@ unsigned short get_temp(void)
 	unsigned int coretemp;
 
 	temps = fopen(CPU_TEMPFILE, "r");
-	fscanf(temps, "%ud", &coretemp);
+	unsigned short retval = fscanf(temps, "%ud", &coretemp);
 	fclose(temps);
 	coretemp = coretemp * 0.001;
 	return coretemp;
@@ -148,7 +148,7 @@ unsigned short get_power(void)
 	unsigned short battery_charge = 0;
 	/* If battery exists get battery charge*/
 	if (power_fd) {
-		fscanf(power_fd, "%hu", &battery_charge);
+		unsigned short retval = fscanf(power_fd, "%hu", &battery_charge);
 		fclose(power_fd);
 		power_fd = fopen(AC_FILE, "r");
 		char ac_on = fgetc(power_fd);
