@@ -67,7 +67,7 @@ int main(void)
 		/* get the battery life */
 		battery_life = get_power();
 		/* get the uptime of machine in minutes */
-		uptime = get_uptime(&s_info) / 60;
+		uptime = s_info.uptime / 60;
 		/* format the uptime into minutes */
 		up_hours = uptime / 60;
 		up_minutes = uptime % 60;

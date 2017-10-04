@@ -178,14 +178,6 @@ unsigned short get_power(void)
 }
 
 /**
- * get and return the total uptime of machine in seconds
- */
-long get_uptime(struct sysinfo *s_info)
-{
-	return s_info->uptime;
-}
-
-/**
  * get and return an array of chars representing the time of the system:
  * day_of_week month/day  hour:minutes
  */
