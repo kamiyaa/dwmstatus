@@ -1,9 +1,13 @@
 # dwmstatus
 ## Description
-A hardlinked status bar for Dynamic Window Manager(dwm), written in C.
+A simple, customizable status bar for Dynamic Window Manager(dwm), written in C.
+
+Exports status bar to X11 root window via xcb instead of xlib
 
 Output:
+```
 <---> │ 0.8GHz │ 41°C │ [0%] │ 2:40 │ Mon 08/07  12:32 
+```
 
 ## Requirements
  - clang/gcc
@@ -22,7 +26,8 @@ make
 
 ## Running
 ```
-./dwmstatus
+./dwmstatus_std  # for outputting to stdout
+./dwmstatus_xcb  # for outputting to X11 root window
 ```
 
 ## Configuration
@@ -32,18 +37,8 @@ Note: some functions may be commented from my usages.
 Uncomment to use them.
 
 ## Features
- - Displays date
-
- - Displays uptime
-
- - Displays battery percentage
-
- - Displays a single cpu's frequency
-
- - Displays a single cpu's cpu temperature
-
+ - Displays date, uptime, battery percentage
+ - Displays a single cpu's frequency and temperature
  - Displays network connections
    - only if connected to access point
-   - does not check for internet access,
-
- - Exports status bar to X11 root window via xcb instead of xlib
+   - does not check for internet access
