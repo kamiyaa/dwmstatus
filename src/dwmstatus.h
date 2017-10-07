@@ -1,6 +1,5 @@
 #include <sys/sysinfo.h>
 
-
 /* Status bar refresh rates on battery and on AC */
 static const unsigned int rrate_battery	= 30;
 static const unsigned int rrate_ac	= 3;
