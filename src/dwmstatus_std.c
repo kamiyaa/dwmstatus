@@ -3,8 +3,6 @@
 #include <unistd.h>
 #include <time.h>
 
-#include <sys/sysinfo.h>
-
 #include "dwmstatus.h"
 
 static unsigned short keep_running = 1;

@@ -4,8 +4,6 @@
 #include <time.h>
 #include <signal.h>
 
-#include <sys/sysinfo.h>
-
 #include <xcb/xcb.h>
 #include <xcb/xcb_atom.h>
 
