@@ -56,38 +56,37 @@ int main(void)
 
 	signal(SIGINT, exit_cleanup);
 
-	static struct sysinfo s_info;
+	struct sysinfo s_info;
 
+	unsigned int counter = 60;
 	while (keep_running) {
-		/* setup sysinfo with values */
-		initialize_sysinfo(&s_info);
+		if (counter >= 60) {
+			counter = 0;
 
-		/* get the battery life */
-		battery_life = get_power();
-		/* get the uptime of machine in minutes */
-		uptime = s_info.uptime / 60;
-		/* format the uptime into minutes */
-		up_hours = uptime / 60;
-		up_minutes = uptime % 60;
+			/* setup sysinfo with values */
+			sysinfo(&s_info);
+
+			/* get the uptime of machine in minutes */
+			uptime = s_info.uptime / 60;
+			/* format the uptime into minutes */
+			up_hours = uptime / 60;
+			up_minutes = uptime % 60;
+
+			/* get the battery life */
+			battery_life = get_power();
+
+			/* get the system time */
+			system_time = unixtime();
+		}
+
 		/* get the network status */
 		net_status = get_network_status();
-		/* get the system time */
-		system_time = unixtime();
 		/* get the temperature of cpu */
 		cpu_temp = get_temp();
 
-		/* if update delay is greater than 5, then we are on battery mode */
-		if (status_rrate == rrate_battery) {
-			snprintf(status, status_len,
-				"%s \u2502 %u\u00B0C \u2502 [%u%%] \u2502 %d:%d \u2502 %s ",
-				net_status, cpu_temp, battery_life, up_hours, up_minutes, system_time);
-		}
-		/* otherwise, we are in normal mode */
-		else {
-			snprintf(status, status_len,
-				"%s \u2502 %0.1fGHz \u2502 %u\u00B0C \u2502 [%u%%] \u2502 %d:%d \u2502 %s ",
-				net_status, get_freq(), cpu_temp, battery_life, up_hours, up_minutes, system_time);
-		}
+		snprintf(status, status_len,
+			"%s \u2502 %0.1fGHz \u2502 %u\u00B0C \u2502 [%u%%] \u2502 %d:%d \u2502 %s ",
+			net_status, get_freq(), cpu_temp, battery_life, up_hours, up_minutes, system_time);
 
 		/* changed root window name */
 		xcb_change_property(connection,
@@ -104,6 +103,7 @@ int main(void)
 
 		/* refresh rate */
 		sleep(status_rrate);
+		counter += status_rrate;
 	}
 
 	return 0;

@@ -1,5 +1,3 @@
-/* Hardcoded file locations */
-
 /* File indicating AC is present */
 #define AC_FILE		"/sys/class/power_supply/AC/online"
 
