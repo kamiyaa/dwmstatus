@@ -58,9 +58,10 @@ int main(void)
 
 	struct sysinfo s_info;
 
-	unsigned int counter = 60;
+	/* use a counter to update less important info less often */
+	unsigned int counter = status_lirate;
 	while (keep_running) {
-		if (counter >= 60) {
+		if (counter >= status_lirate) {
 			counter = 0;
 
 			/* setup sysinfo with values */

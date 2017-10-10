@@ -5,6 +5,8 @@ static const unsigned int rrate_battery	= 30;
 static const unsigned int rrate_ac	= 3;
 /* Status bar refresh rate */
 static unsigned int status_rrate	= 1;
+/* refresh rate of less important info */
+static unsigned int status_lirate	= 60;
 
 /**
  * grabs sysinfo
