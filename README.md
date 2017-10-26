@@ -13,9 +13,9 @@ Output:
  - clang/gcc
  - libxcb [For exporting status bar to root X11 window]
  - Kernel options:
-  - Expose thermal sensors as hwmon device (CONFIG_THERMAL_HWMON) [For getting cpu temps]
-  - sysfs file system support (CONFIG_SYSFS) [Where most information will be parsed from]
-  - /proc file system support (CONFIG_PROC_FS) [For memory and audio info]
+    - CONFIG_PROC_FS: /proc file system support [For audio info]
+   - CONFIG_SYSFS: sysfs file system support [Where most information will be parsed from]
+   - CONFIG_THERMAL_HWMON: Expose thermal sensors as hwmon device [For getting cpu temps]
 
 ## Installation
 ```
@@ -40,5 +40,4 @@ Uncomment to use them.
  - Displays date, uptime, battery percentage
  - Displays a single cpu's frequency and temperature
  - Displays network connections
-   - only if connected to access point
-   - does not check for internet access
+   - only if connected to access point, not internet access
