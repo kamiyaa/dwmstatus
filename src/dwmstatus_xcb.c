@@ -37,19 +37,17 @@ int main(void)
 		root_window = screen->root;
 	}
 
-	/* get the battery life */
-	unsigned int battery_life;
-	/* get the uptime of machine in minutes */
-	long uptime;
 	/* format the uptime into minutes */
 	unsigned int up_hours;
 	unsigned int up_minutes;
-	/* get the network status */
+
+	unsigned int battery_life;
+
+	long uptime;
 	char *net_status;
-	/* get the system time */
 	char *system_time;
-	/* get the temperature of cpu */
 	unsigned short cpu_temp;
+	float cpu_freq;
 
 	unsigned short status_len = 70;
 	char status[status_len];
@@ -85,9 +83,12 @@ int main(void)
 		/* get the temperature of cpu */
 		cpu_temp = get_temp();
 
+		/* get the frequency of cpu */
+		cpu_freq = get_freq();
+
 		snprintf(status, status_len,
 			"%s \u2502 %0.1fGHz \u2502 %u\u00B0C \u2502 [%u%%] \u2502 %d:%d \u2502 %s ",
-			net_status, get_freq(), cpu_temp, battery_life, up_hours, up_minutes, system_time);
+			net_status, cpu_freq, cpu_temp, battery_life, up_hours, up_minutes, system_time);
 
 		/* changed root window name */
 		xcb_change_property(connection,
