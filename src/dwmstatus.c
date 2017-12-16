@@ -96,17 +96,18 @@ float get_freq(void)
 	FILE *freq_fd;
 	freq_fd = fopen(CPU_FREQFILE, "r");
 
-	float corefreq;
+	unsigned int raw_freq;
+	float core_freq;
 	if (freq_fd) {
-		int retval = fscanf(freq_fd, "%f", &corefreq);
+		int retval = fscanf(freq_fd, "%d", &raw_freq);
 		fclose(freq_fd);
 		/* Format the frequency to GHz */
-		corefreq = corefreq * 0.000001;
+		core_freq = raw_freq * 0.000001;
 	}
 	else {
-		corefreq = -0.1;
+		core_freq = -0.1;
 	}
-	return corefreq;
+	return core_freq;
 }
 
 /**
