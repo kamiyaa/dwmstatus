@@ -45,7 +45,7 @@ float get_freq(void);
 /**
  * get and return the temperature of the core in celsius
  */
-short get_temp(void);
+unsigned short get_temp(void);
 
 /* Volume (Hexadecimal) */
 
