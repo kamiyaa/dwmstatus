@@ -97,15 +97,12 @@ float get_freq(void)
 	freq_fd = fopen(CPU_FREQFILE, "r");
 
 	unsigned int raw_freq;
-	float core_freq;
+	float core_freq = 0;
 	if (freq_fd) {
 		int retval = fscanf(freq_fd, "%ud", &raw_freq);
 		fclose(freq_fd);
 		/* Format the frequency to GHz */
 		core_freq = raw_freq * 0.000001;
-	}
-	else {
-		core_freq = -0.1;
 	}
 	return core_freq;
 }
@@ -113,11 +110,11 @@ float get_freq(void)
 /**
  * get and return the temperature of the core in celsius
  */
-unsigned short get_temp(void)
+short get_temp(void)
 {
 	FILE *temp_fd;
 	unsigned int raw_temp;
-	unsigned short core_temp = 0;
+	short core_temp = 0;
 
 	temp_fd = fopen(CPU_TEMPFILE, "r");
 	if (temp_fd) {
