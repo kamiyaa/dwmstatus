@@ -183,7 +183,7 @@ char *unixtime(void)
 	time_t date;
 	struct tm *tm_info;
 
-	char *format = "%a %m/%d  %I:%M";
+	const char *format = "%a %m/%d  %I:%M";
 	time(&date);
 	tm_info = localtime(&date);
 	strftime(buffer, sizeof(buffer), format, tm_info);

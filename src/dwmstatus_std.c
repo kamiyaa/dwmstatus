@@ -1,11 +1,9 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
-#include <time.h>
 
 #include "dwmstatus.h"
 
-static unsigned short keep_running = 1;
+static unsigned char keep_running = 1;
 
 int main(void)
 {
