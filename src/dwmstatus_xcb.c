@@ -13,11 +13,9 @@ static xcb_connection_t *connection;
 /**
  * handles all memory cleanups when program is told to stop
  */
-void exit_cleanup(int opt_code)
+void sigint_handler()
 {
 	keep_running = 0;
-	/* disconnect from X server */
-	xcb_disconnect(connection);
 }
 
 
@@ -50,7 +48,7 @@ int main(void)
 	unsigned short status_len = 70;
 	char status[status_len];
 
-	signal(SIGINT, exit_cleanup);
+	signal(SIGINT, sigint_handler);
 
 	struct sysinfo s_info;
 
@@ -105,6 +103,9 @@ int main(void)
 		sleep(status_rrate);
 		counter += status_rrate;
 	}
+
+	/* disconnect from X server */
+	xcb_disconnect(connection);
 
 	return 0;
 }

@@ -8,6 +8,10 @@
 #include "dwmstatus.h"
 #include "config.h"
 
+/* Status bar refresh rates on battery and on AC */
+static const unsigned int rrate_battery	= 30;
+static const unsigned int rrate_ac	= 3;
+
 /**
  * grabs sysinfo
  */
@@ -99,7 +103,7 @@ float get_freq(void)
 	unsigned int raw_freq;
 	float core_freq = 0;
 	if (freq_fd) {
-		int retval = fscanf(freq_fd, "%ud", &raw_freq);
+		fscanf(freq_fd, "%ud", &raw_freq);
 		fclose(freq_fd);
 		/* Format the frequency to GHz */
 		core_freq = raw_freq * 0.000001;
@@ -118,7 +122,7 @@ short get_temp(void)
 
 	temp_fd = fopen(CPU_TEMPFILE, "r");
 	if (temp_fd) {
-		int retval = fscanf(temp_fd, "%ud", &raw_temp);
+		fscanf(temp_fd, "%ud", &raw_temp);
 		fclose(temp_fd);
 		core_temp = raw_temp * 0.001;
 	}
@@ -150,7 +154,7 @@ unsigned short get_power(void)
 	unsigned short battery_charge = 0;
 	/* If battery exists get battery charge*/
 	if (power_fd) {
-		unsigned short retval = fscanf(power_fd, "%hu", &battery_charge);
+		fscanf(power_fd, "%hu", &battery_charge);
 		fclose(power_fd);
 		power_fd = fopen(AC_FILE, "r");
 		char ac_on = fgetc(power_fd);
