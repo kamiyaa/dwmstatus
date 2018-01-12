@@ -3,7 +3,7 @@ run_command('cp',
         ['-u', 'config.def.h', 'config.h']
         )
 
-libxcb = dependency('xcb')
+dep_xcb = dependency('xcb')
 
 helpers = ['dwmstatus.c']
 
@@ -14,7 +14,7 @@ executable('dwmstatus_std',
 
 executable('dwmstatus_xcb',
 	'dwmstatus_xcb.c', helpers,
-	dependencies : libxcb,
+	dependencies : dep_xcb,
 	install: true
 	)
 

@@ -10,8 +10,8 @@ Output:
 ```
 
 ## Requirements
- - clang/gcc
- - libxcb [For exporting status bar to root X11 window]
+ - c compiler
+ - [libxcb](https://xcb.freedesktop.org/) [For exporting status bar to root X11 window]
  - Kernel options:
     - CONFIG_PROC_FS: /proc file system support [For audio info]
    - CONFIG_SYSFS: sysfs file system support [Where most information will be parsed from]
