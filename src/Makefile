@@ -28,8 +28,8 @@ dwmstatus_std: dwmstatus_std.o dwmstatus_std.c dwmstatus.o
 	${CC} ${CFLAGS} $@.o dwmstatus.o -o $@
 
 install:
-	cp dwmstatus_std /usr/local/bin/dwmstatus_std
-	cp dwmstatus_xcb /usr/local/bin/dwmstatus_xcb
+	cp dwmstatus_std ${PREFIX}/bin/dwmstatus_std
+	cp dwmstatus_xcb ${PREFIX}/bin/dwmstatus_xcb
 
 clean:
 	rm -f *.o dwmstatus_std dwmstatus_xcb
