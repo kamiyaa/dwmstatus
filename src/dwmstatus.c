@@ -159,16 +159,15 @@ unsigned short get_power(void)
 		power_fd = fopen(AC_FILE, "r");
 		char ac_on = fgetc(power_fd);
 		fclose(power_fd);
-		/* If connected to AC, refresh rate will be set to 3
-		 * seconds
+		/* refresh rate with change depending on if we are
+		 * on ac or battery
 		 */
-		if (ac_on == '1')
+		if (ac_on == '1' && status_rrate != rrate_ac) {
 			status_rrate = rrate_ac;
-		/* Else, change the refresh rate to 30 seconds to save
-		 * battery
-		 */
-		else if (status_rrate != rrate_battery)
+		}
+		else if (status_rrate != rrate_battery) {
 			status_rrate = rrate_battery;
+		}
 	}
 	/* We must be connected to ac then */
 	else if (status_rrate != rrate_ac)
