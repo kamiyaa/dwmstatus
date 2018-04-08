@@ -19,7 +19,7 @@ void sigint_handler()
 }
 
 
-int main(void)
+int main()
 {
 	/* display number */
 	int screen_default_nbr;
@@ -29,9 +29,8 @@ int main(void)
 	/* get the screen and the root window */
 	xcb_screen_t *screen = xcb_setup_roots_iterator(xcb_get_setup(connection)).data;
 	xcb_window_t root_window = 0;
-	if (screen) {
+	if (screen)
 		root_window = screen->root;
-	}
 
 	/* format the uptime into minutes */
 	unsigned int up_hours;

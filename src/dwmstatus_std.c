@@ -5,7 +5,7 @@
 
 static unsigned char keep_running = 1;
 
-int main(void)
+int main()
 {
 	/* get the battery life */
 	unsigned int battery_life;

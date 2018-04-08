@@ -19,7 +19,7 @@ void initialize_sysinfo(struct sysinfo *s_info)
 {
 	int error = sysinfo(s_info);
 	if (error)
-		printf("Error: error code: %d\n", error);
+		fprintf(stderr, "Error: error code: %d\n", error);
 }
 
 /**
@@ -29,34 +29,28 @@ void initialize_sysinfo(struct sysinfo *s_info)
  * [---] - wired connection to network
  * --/-- - no connection to network
  */
-char *get_network_status(void)
+char *get_network_status()
 {
-	/* Open up the wireless interface carrier file to check if
-	 * it is connected to a network.
-	 *
-	 */
-	FILE *carrier_fd;
-	carrier_fd = fopen(WLAN_CARFILE, "r");
 	unsigned char iface_status;
-
+	FILE *carrier_fd;
+	char *status;
 	/* If the file exists, get and return its state */
-	if (carrier_fd) {
-		iface_status = fgetc(carrier_fd);
+	if ((carrier_fd = fopen(WLAN_CARFILE, "r"))) {
+		if (fgetc(carrier_fd) == '1') {
+			fclose(carrier_fd);
+			return "<--->";
+		}
 		fclose(carrier_fd);
-		if (iface_status == '1')
-			return "<--->\0";
 	}
 	/* Else, check if the wired interface carrier file exists */
-	else {
-		carrier_fd = fopen(ETH_CARFILE, "r");
-		if (carrier_fd) {
-			iface_status = fgetc(carrier_fd);
+	if ((carrier_fd = fopen(ETH_CARFILE, "r"))) {
+		if (fgetc(carrier_fd) == '1') {
 			fclose(carrier_fd);
-			if (iface_status == '1')
-				return "[---]\0";
+			return "[---]";
 		}
+		fclose(carrier_fd);
 	}
-	return "--/--\0";
+	return "--/--";
 }
 
 /**
@@ -92,21 +86,21 @@ unsigned long get_used_mem(struct sysinfo *s_info)
 /**
  * get and return the current frequency of the core
  */
-float get_freq(void)
+float get_freq()
 {
 	/* Open up core0 frequency sysfs file for parsing current
 	 * frequency
 	 */
-	FILE *freq_fd;
-	freq_fd = fopen(CPU_FREQFILE, "r");
-
 	unsigned int raw_freq;
 	float core_freq = 0;
-	if (freq_fd) {
-		fscanf(freq_fd, "%ud", &raw_freq);
+
+	FILE *freq_fd;
+	if ((freq_fd = fopen(CPU_FREQFILE, "r"))) {
+		if (fscanf(freq_fd, "%ud", &raw_freq) == 1) {
+			/* Format the frequency to GHz */
+			core_freq = raw_freq * 0.000001;
+		}
 		fclose(freq_fd);
-		/* Format the frequency to GHz */
-		core_freq = raw_freq * 0.000001;
 	}
 	return core_freq;
 }
@@ -114,23 +108,23 @@ float get_freq(void)
 /**
  * get and return the temperature of the core in celsius
  */
-short get_temp(void)
+short get_temp()
 {
 	FILE *temp_fd;
 	unsigned int raw_temp;
 	short core_temp = 0;
 
-	temp_fd = fopen(CPU_TEMPFILE, "r");
-	if (temp_fd) {
-		fscanf(temp_fd, "%ud", &raw_temp);
+	if ((temp_fd = fopen(CPU_TEMPFILE, "r"))) {
+		if (fscanf(temp_fd, "%ud", &raw_temp) == 1) {
+			core_temp = raw_temp * 0.001;
+		}
 		fclose(temp_fd);
-		core_temp = raw_temp * 0.001;
 	}
 	return core_temp;
 }
 
 /* Volume (Hexadecimal) */
-/* unsigned int get_volume(void)
+/* unsigned int get_volume()
 {
 	FILE *codec;
 	codec = fopen(SOUNDFILE, "r");
@@ -146,7 +140,7 @@ short get_temp(void)
 }*/
 
 /* Power */
-unsigned short get_power(void)
+unsigned short get_power()
 {
 	/* Open up the sysfs file for battery info */
 	FILE *power_fd;
@@ -180,7 +174,7 @@ unsigned short get_power(void)
  * get and return an array of chars representing the time of the system:
  * day_of_week month/day  hour:minutes
  */
-char *unixtime(void)
+char *unixtime()
 {
 	static char buffer[22];
 	time_t date;
