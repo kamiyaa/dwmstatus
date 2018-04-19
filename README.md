@@ -6,7 +6,12 @@ Exports status bar to X11 root window via xcb instead of xlib
 
 Output:
 ```
-<---> │ 0.8GHz │ 41°C │ [0%] │ 2:40 │ Mon 08/07  12:32 
+/* charging */
+<---> │ 0.8GHz │ 36°C │ [91%+] │ 0:23 │ Thu 10/29  4:20
+/* discharging */
+<---> │ 0.8GHz │ 36°C │ [54%] │ 0:23 │ Thu 10/29  4:20
+/* AC power */
+<---> │ 0.8GHz │ 36°C │ [AC] │ 0:23 │ Thu 10/29  4:20
 ```
 
 ## Requirements
@@ -18,16 +23,29 @@ Output:
    - CONFIG_THERMAL_HWMON: Expose thermal sensors as hwmon device [For getting cpu temps]
 
 ## Installation
+First, download the source using either HTTP or SSH:
 ```
-git clone git@github.com:Kamiyaa/dwmstatus.git
-cd dwmstatus/src
-make
+$ git clone https://github.com/Kamiyaa/ruiji.git
+$ git clone git@github.com:Kamiyaa/ruiji.git
+```
+Then install using **make**:
+```
+$ cd dwmstatus/src
+$ make
+# make install
+```
+Alternatively, you can install using **meson**:
+```
+$ cd dwmstatus
+$ meson build
+$ ninja -C build
+# ninja -C build install
 ```
 
 ## Running
 ```
-./dwmstatus_std  # for outputting to stdout
-./dwmstatus_xcb  # for outputting to X11 root window
+dwmstatus_std  # for outputting to stdout
+dwmstatus_xcb  # for outputting to X11 root window
 ```
 
 ## Configuration
