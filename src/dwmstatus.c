@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <time.h>
 
@@ -31,9 +32,7 @@ void initialize_sysinfo(struct sysinfo *s_info)
  */
 char *get_network_status()
 {
-	unsigned char iface_status;
 	FILE *carrier_fd;
-	char *status;
 	/* If the file exists, get and return its state */
 	if ((carrier_fd = fopen(WLAN_CARFILE, "r"))) {
 		if (fgetc(carrier_fd) == '1') {
@@ -140,34 +139,57 @@ short get_temp()
 }*/
 
 /* Power */
-unsigned short get_power()
+char *get_power()
 {
+	static char ac_on;
+	static char power_buf[7];
+	static unsigned short battery_charge;
+
 	/* Open up the sysfs file for battery info */
 	FILE *power_fd;
-	power_fd = fopen(BAT_CAPFILE, "r");
-	unsigned short battery_charge = 0;
 	/* If battery exists get battery charge*/
-	if (power_fd) {
-		fscanf(power_fd, "%hu", &battery_charge);
-		fclose(power_fd);
-		power_fd = fopen(AC_FILE, "r");
-		char ac_on = fgetc(power_fd);
-		fclose(power_fd);
-		/* refresh rate with change depending on if we are
-		 * on ac or battery
-		 */
-		if (ac_on == '1' && status_rrate != rrate_ac) {
-			status_rrate = rrate_ac;
-		}
-		else if (status_rrate != rrate_battery) {
-			status_rrate = rrate_battery;
-		}
-	}
-	/* We must be connected to ac then */
-	else if (status_rrate != rrate_ac)
-		status_rrate = rrate_ac;
+	unsigned short tmp_charge;
+	int tmp_on;
 
-	return battery_charge;
+	/* if we can't open battery file, then we are on AC */
+	if ((power_fd = fopen(BAT_CAPFILE, "r")) == NULL) {
+		if (status_rrate != rrate_ac)
+			status_rrate = rrate_ac;
+		return "AC";
+	}
+
+	/* error if we are on battey, but can't retrieve
+	 * battery life information */
+	if (fscanf(power_fd, "%hu", &tmp_charge) != 1) {
+		fclose(power_fd);
+		return "Failed to get battery";
+	}
+	fclose(power_fd);
+
+	if ((power_fd = fopen(AC_FILE, "r"))) {
+		tmp_on = fgetc(power_fd);
+		fclose(power_fd);
+		if (ac_on != tmp_on)
+			ac_on = tmp_on;
+	}
+
+	if (battery_charge != tmp_charge) {
+		battery_charge = tmp_charge;
+		snprintf(power_buf, sizeof(power_buf),
+			"%hu%%", battery_charge);
+		if (ac_on == '1')
+			strcat(power_buf, "+");
+	}
+
+	if (ac_on == '1' && status_rrate != rrate_ac)
+		status_rrate = rrate_ac;
+	else if (status_rrate != rrate_battery)
+		status_rrate = rrate_battery;
+
+	/* refresh rate with change depending on if we are
+	 * on ac or battery
+	 */
+	return power_buf;
 }
 
 /**
@@ -176,14 +198,14 @@ unsigned short get_power()
  */
 char *unixtime()
 {
-	static char buffer[22];
+	static char time_buf[22];
+	static const char *format = "%a %m/%d  %I:%M";
+
 	time_t date;
-	struct tm *tm_info;
-
-	const char *format = "%a %m/%d  %I:%M";
 	time(&date);
-	tm_info = localtime(&date);
-	strftime(buffer, sizeof(buffer), format, tm_info);
 
-	return buffer;
+	struct tm *tm_info = localtime(&date);
+	strftime(time_buf, sizeof(time_buf), format, tm_info);
+
+	return time_buf;
 }

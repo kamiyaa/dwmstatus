@@ -8,7 +8,7 @@ static unsigned char keep_running = 1;
 int main()
 {
 	/* get the battery life */
-	unsigned int battery_life;
+	char *battery_status;
 	long uptime;
 	/* format the uptime into minutes */
 	unsigned int up_hours;
@@ -37,7 +37,7 @@ int main()
 			up_minutes = uptime % 60;
 
 			/* get the battery life */
-			battery_life = get_power();
+			battery_status = get_power();
 
 			/* get the system time */
 			system_time = unixtime();
@@ -50,8 +50,8 @@ int main()
 		cpu_freq = get_freq();
 
 		/* output and flush status to stdout */
-		printf("%s \u2502 %0.1fGHz \u2502 %u\u00B0C \u2502 [%u%%] \u2502 %d:%d \u2502 %s \n",
-			net_status, cpu_freq, cpu_temp, battery_life, up_hours, up_minutes, system_time);
+		printf("%s \u2502 %0.1fGHz \u2502 %u\u00B0C \u2502 [%s] \u2502 %d:%d \u2502 %s \n",
+			net_status, cpu_freq, cpu_temp, battery_status, up_hours, up_minutes, system_time);
 		fflush(stdout);
 
 		/* refresh rate of status bar */

@@ -36,7 +36,7 @@ int main()
 	unsigned int up_hours;
 	unsigned int up_minutes;
 
-	unsigned int battery_life;
+	char *battery_status;
 
 	long uptime;
 	char *net_status;
@@ -67,7 +67,7 @@ int main()
 			up_minutes = uptime % 60;
 
 			/* get the battery life */
-			battery_life = get_power();
+			battery_status = get_power();
 
 			/* get the system time */
 			system_time = unixtime();
@@ -82,8 +82,8 @@ int main()
 		cpu_freq = get_freq();
 
 		snprintf(status, status_len,
-			"%s \u2502 %0.1fGHz \u2502 %u\u00B0C \u2502 [%u%%] \u2502 %d:%d \u2502 %s ",
-			net_status, cpu_freq, cpu_temp, battery_life, up_hours, up_minutes, system_time);
+			"%s \u2502 %0.1fGHz \u2502 %u\u00B0C \u2502 [%s] \u2502 %d:%d \u2502 %s ",
+			net_status, cpu_freq, cpu_temp, battery_status, up_hours, up_minutes, system_time);
 
 		/* changed root window name */
 		xcb_change_property(connection,

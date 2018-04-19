@@ -47,7 +47,7 @@ short get_temp(void);
 /* Volume (Hexadecimal) */
 
 /* Power */
-unsigned short get_power(void);
+char *get_power(void);
 
 /**
  * get and return an array of chars representing the time of the system:
