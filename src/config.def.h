@@ -21,3 +21,6 @@
 
 /* Directory for battery presence */
 #define BAT_DIR		"/sys/class/power_supply/BAT0"
+
+/* File with battery drain information in milliwatts */
+#define BAT_DRAIN_FILE	"/sys/class/power_supply/BAT0/power_now"

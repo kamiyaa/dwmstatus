@@ -30,7 +30,7 @@ void initialize_sysinfo(struct sysinfo *s_info)
  * [---] - wired connection to network
  * --/-- - no connection to network
  */
-char *get_network_status()
+char *network_status()
 {
 	FILE *carrier_fd;
 	/* If the file exists, get and return its state */
@@ -55,7 +55,7 @@ char *get_network_status()
 /**
  * get and return the current amount of free ram in KBs
  */
-long get_free_mem(struct sysinfo *s_info)
+long memfree(struct sysinfo *s_info)
 {
 	unsigned long free_ram = s_info->freeram;
 	return free_ram;
@@ -64,7 +64,7 @@ long get_free_mem(struct sysinfo *s_info)
 /**
  * get and return the total amount of ram in KBs
  */
-unsigned long get_total_mem(struct sysinfo *s_info)
+unsigned long memtotal(struct sysinfo *s_info)
 {
 	unsigned long total_mem = s_info->totalram;
 	return total_mem;
@@ -73,10 +73,10 @@ unsigned long get_total_mem(struct sysinfo *s_info)
 /**
  * get and return the current amount of ram used in KBs
  */
-unsigned long get_used_mem(struct sysinfo *s_info)
+unsigned long memused(struct sysinfo *s_info)
 {
-	unsigned long total_mem = get_total_mem(s_info);
-	unsigned long free_mem = get_free_mem(s_info);
+	unsigned long total_mem = memtotal(s_info);
+	unsigned long free_mem = memfree(s_info);
 	unsigned long used_mem = total_mem - free_mem;
 	return used_mem;
 }
@@ -85,7 +85,7 @@ unsigned long get_used_mem(struct sysinfo *s_info)
 /**
  * get and return the current frequency of the core
  */
-float get_freq()
+float cpufreq()
 {
 	/* Open up core0 frequency sysfs file for parsing current
 	 * frequency
@@ -107,7 +107,7 @@ float get_freq()
 /**
  * get and return the temperature of the core in celsius
  */
-short get_temp()
+short cputemp()
 {
 	FILE *temp_fd;
 	unsigned int raw_temp;
@@ -138,21 +138,35 @@ short get_temp()
 	return hexvoll;
 }*/
 
+float battery_watt_drain()
+{
+	FILE *fp;
+
+	if ((fp = fopen(BAT_DRAIN_FILE, "r")) == NULL)
+		return -1;
+
+	unsigned int milliwatts;
+	if (fscanf(fp, "%u", &milliwatts) != 1)
+		return -1;
+
+	return milliwatts / 10000000;
+}
+
 /* Power */
-char *get_power()
+char *power_status()
 {
 	static char ac_on;
 	static char power_buf[7];
 	static unsigned short battery_charge;
 
 	/* Open up the sysfs file for battery info */
-	FILE *power_fd;
+	FILE *fp;
 	/* If battery exists get battery charge*/
 	unsigned short tmp_charge;
 	int tmp_on;
 
 	/* if we can't open battery file, then we are on AC */
-	if ((power_fd = fopen(BAT_CAPFILE, "r")) == NULL) {
+	if ((fp = fopen(BAT_CAPFILE, "r")) == NULL) {
 		if (status_rrate != rrate_ac)
 			status_rrate = rrate_ac;
 		return "AC";
@@ -160,15 +174,15 @@ char *get_power()
 
 	/* error if we are on battey, but can't retrieve
 	 * battery life information */
-	if (fscanf(power_fd, "%hu", &tmp_charge) != 1) {
-		fclose(power_fd);
+	if (fscanf(fp, "%hu", &tmp_charge) != 1) {
+		fclose(fp);
 		return "Failed to get battery";
 	}
-	fclose(power_fd);
+	fclose(fp);
 
-	if ((power_fd = fopen(AC_FILE, "r"))) {
-		tmp_on = fgetc(power_fd);
-		fclose(power_fd);
+	if ((fp = fopen(AC_FILE, "r"))) {
+		tmp_on = fgetc(fp);
+		fclose(fp);
 		if (ac_on != tmp_on)
 			ac_on = tmp_on;
 	}

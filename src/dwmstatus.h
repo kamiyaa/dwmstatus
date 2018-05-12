@@ -17,37 +17,40 @@ void initialize_sysinfo(struct sysinfo *s_info);
  * [---] - wired connection to network
  * --/-- - no connection to network
  */
-char *get_network_status(void);
+char *network_status();
 
 /**
  * get and return the current amount of free ram in KBs
  */
-long get_free_mem(struct sysinfo *s_info);
+long memfree(struct sysinfo *s_info);
 
 /**
  * get and return the total amount of ram in KBs
  */
-unsigned long get_total_mem(struct sysinfo *s_info);
+unsigned long memtotal(struct sysinfo *s_info);
 
 /**
  * get and return the current amount of ram used in KBs
  */
-unsigned long get_used_mem(struct sysinfo *s_info);
+unsigned long memused(struct sysinfo *s_info);
 
 /**
  * get and return the current frequency of the core
  */
-float get_freq(void);
+float cpufreq();
 
 /**
  * get and return the temperature of the core in celsius
  */
-short get_temp(void);
+short cputemp();
 
 /* Volume (Hexadecimal) */
 
+/* get battery drain in watts */
+float battery_watt_drain();
+
 /* Power */
-char *get_power(void);
+char *power_status();
 
 /**
  * get and return an array of chars representing the time of the system:

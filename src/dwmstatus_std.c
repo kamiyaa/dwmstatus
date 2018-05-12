@@ -14,10 +14,7 @@ int main()
 	unsigned int up_hours;
 	unsigned int up_minutes;
 
-	char *net_status;
 	char *system_time;
-	short cpu_temp;
-	float cpu_freq;
 
 	static struct sysinfo s_info;
 
@@ -37,21 +34,15 @@ int main()
 			up_minutes = uptime % 60;
 
 			/* get the battery life */
-			battery_status = get_power();
+			battery_status = power_status();
 
 			/* get the system time */
 			system_time = unixtime();
 		}
-		/* get the network status */
-		net_status = get_network_status();
-		/* get the temperature of cpu */
-		cpu_temp = get_temp();
-		/* get the frequency of cpu */
-		cpu_freq = get_freq();
 
 		/* output and flush status to stdout */
-		printf("%s \u2502 %0.1fGHz \u2502 %u\u00B0C \u2502 [%s] \u2502 %d:%d \u2502 %s \n",
-			net_status, cpu_freq, cpu_temp, battery_status, up_hours, up_minutes, system_time);
+		printf("%s \u2502 %0.02fGHz \u2502 %u\u00B0C \u2502 [%s] \u2502 %d:%d \u2502 %s \n",
+			network_status(), cpufreq(), cputemp(), battery_status, up_hours, up_minutes, system_time);
 		fflush(stdout);
 
 		/* refresh rate of status bar */
