@@ -8,7 +8,6 @@
 #include "dwmstatus.h"
 
 static unsigned char keep_running = 1;
-static xcb_connection_t *connection;
 
 /**
  * handles all memory cleanups when program is told to stop
@@ -21,10 +20,12 @@ void sigint_handler()
 
 int main()
 {
+	signal(SIGINT, sigint_handler);
+
 	/* display number */
 	int screen_default_nbr;
 	/* connect to display */
-	connection = xcb_connect(NULL, &screen_default_nbr);
+	xcb_connection_t *connection = xcb_connect(NULL, &screen_default_nbr);
 
 	/* get the screen and the root window */
 	xcb_screen_t *screen = xcb_setup_roots_iterator(xcb_get_setup(connection)).data;
@@ -33,20 +34,16 @@ int main()
 		root_window = screen->root;
 
 	/* format the uptime into minutes */
-	unsigned int up_hours;
-	unsigned int up_minutes;
+	unsigned int up_minutes, up_hours;
 
-	char *battery_status;
+	char *battery_status, *system_time;
 
 	long uptime;
-	char *system_time;
 
-	unsigned short status_len = 70;
-	char status[status_len];
-
-	signal(SIGINT, sigint_handler);
+	static char status[100];
 
 	struct sysinfo s_info;
+	alsa_set_max_vol();
 
 	/* use a counter to update less important info less often */
 	unsigned int counter = status_lirate;
@@ -70,9 +67,9 @@ int main()
 			system_time = unixtime();
 		}
 
-		snprintf(status, status_len,
-			"%s \u2502 %0.02fGHz \u2502 %u\u00B0C \u2502 [%s] \u2502 %d:%d \u2502 %s ",
-			network_status(), cpufreq(), cputemp(), battery_status, up_hours, up_minutes, system_time);
+		snprintf(status, sizeof(status),
+			"%s \u2502 %0.02fGHz \u2502 %u\u00B0C \u2502 [%s] \u2502 vol: %d \u2502 %d:%d \u2502 %s ",
+			network_status(), cpufreq(), cputemp(), battery_status, alsa_volume(), up_hours, up_minutes, system_time);
 
 		/* changed root window name */
 		xcb_change_property(connection,
@@ -81,7 +78,7 @@ int main()
 			XCB_ATOM_WM_NAME,
 			XCB_ATOM_STRING,
 			8,
-			status_len,
+			sizeof(status),
 			status);
 
 		/* update display */

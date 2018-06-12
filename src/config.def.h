@@ -16,11 +16,11 @@
 /* File with current connectivity status of (wireless) network interface */
 #define WLAN_CARFILE	"/sys/class/net/wlp4s0/carrier"
 
-/* File with volume of speakers (hex value) */
-#define SOUNDFILE	"/proc/asound/card1/codec#0"
-
 /* Directory for battery presence */
 #define BAT_DIR		"/sys/class/power_supply/BAT0"
 
 /* File with battery drain information in milliwatts */
 #define BAT_DRAIN_FILE	"/sys/class/power_supply/BAT0/power_now"
+
+/* Which sound card volume to display */
+#define SOUNDCARD	"default"

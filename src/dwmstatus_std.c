@@ -1,22 +1,30 @@
 #include <stdio.h>
 #include <unistd.h>
+#include <signal.h>
 
 #include "dwmstatus.h"
 
 static unsigned char keep_running = 1;
 
+/**
+ * handles all memory cleanups when program is told to stop
+ */
+void sigint_handler()
+{
+        keep_running = 0;
+}
+
 int main()
 {
-	/* get the battery life */
-	char *battery_status;
-	long uptime;
-	/* format the uptime into minutes */
-	unsigned int up_hours;
-	unsigned int up_minutes;
+	signal(SIGINT, sigint_handler);
 
-	char *system_time;
+	/* format the uptime into minutes */
+	unsigned int up_minutes, up_hours, volume;
+	long uptime;
+	char *system_time, *battery_status;
 
 	static struct sysinfo s_info;
+	alsa_set_max_vol();
 
         /* use a counter to update less important info less often */
 	unsigned int counter = status_lirate;
@@ -38,11 +46,14 @@ int main()
 
 			/* get the system time */
 			system_time = unixtime();
+
 		}
 
+		volume = alsa_volume();
+
 		/* output and flush status to stdout */
-		printf("%s \u2502 %0.02fGHz \u2502 %u\u00B0C \u2502 [%s] \u2502 %d:%d \u2502 %s \n",
-			network_status(), cpufreq(), cputemp(), battery_status, up_hours, up_minutes, system_time);
+		printf("%s \u2502 %0.02fGHz \u2502 %u\u00B0C \u2502 [%s] \u2502 Vol: %d%% \u2502 %d:%d \u2502 %s \n",
+			network_status(), cpufreq(), cputemp(), battery_status, volume, up_hours, up_minutes, system_time);
 		fflush(stdout);
 
 		/* refresh rate of status bar */

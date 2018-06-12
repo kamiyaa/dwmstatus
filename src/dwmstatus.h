@@ -34,6 +34,9 @@ unsigned long memtotal(struct sysinfo *s_info);
  */
 unsigned long memused(struct sysinfo *s_info);
 
+void alsa_set_max_vol();
+unsigned int alsa_volume();
+
 /**
  * get and return the current frequency of the core
  */

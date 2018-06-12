@@ -6,12 +6,19 @@
 
 #include <sys/sysinfo.h>
 
+#include <alsa/asoundlib.h>
+#include <alsa/mixer.h>
+
 #include "dwmstatus.h"
 #include "config.h"
+
+#define alloca(x)  __builtin_alloca(x)
 
 /* Status bar refresh rates on battery and on AC */
 static const unsigned int rrate_battery	= 30;
 static const unsigned int rrate_ac	= 3;
+
+static long max_vol;
 
 /**
  * grabs sysinfo
@@ -79,6 +86,73 @@ unsigned long memused(struct sysinfo *s_info)
 	unsigned long free_mem = memfree(s_info);
 	unsigned long used_mem = total_mem - free_mem;
 	return used_mem;
+}
+
+void alsa_set_max_vol()
+{
+	snd_mixer_t *handle;
+	snd_mixer_selem_id_t *sid;
+
+	snd_mixer_open(&handle, 0);
+	snd_mixer_attach(handle, SOUNDCARD);
+	snd_mixer_selem_register(handle, NULL, NULL);
+	snd_mixer_load(handle);
+
+	snd_mixer_selem_id_alloca(&sid);
+	snd_mixer_selem_id_set_index(sid, 0);
+	snd_mixer_selem_id_set_name(sid, "Master");
+
+	long min, max;
+
+	snd_mixer_elem_t *elem = snd_mixer_find_selem(handle, sid);
+
+        snd_mixer_selem_get_playback_volume_range(elem, &min, &max);
+
+	snd_mixer_close(handle);
+
+	max_vol = max;
+}
+
+unsigned int alsa_volume()
+{
+	snd_mixer_t *handle;
+	snd_mixer_selem_id_t *sid;
+
+	snd_mixer_open(&handle, 0);
+	snd_mixer_attach(handle, SOUNDCARD);
+	snd_mixer_selem_register(handle, NULL, NULL);
+	snd_mixer_load(handle);
+
+	snd_mixer_selem_id_alloca(&sid);
+	snd_mixer_selem_id_set_index(sid, 0);
+	snd_mixer_selem_id_set_name(sid, "Master");
+
+	long volume;
+
+	snd_mixer_elem_t *elem = snd_mixer_find_selem(handle, sid);
+
+	snd_mixer_selem_get_playback_volume(elem,
+		SND_MIXER_SCHN_FRONT_LEFT, &volume);
+	snd_mixer_close(handle);
+
+	return volume * 100 / max_vol;
+}
+
+int alsa_vol_percentage(snd_mixer_t *handle, snd_mixer_selem_id_t *sid)
+{
+	long min, max, volume;
+
+	printf("getting elem\n");
+	snd_mixer_elem_t *elem = snd_mixer_find_selem(handle, sid);
+
+	printf("getting range\n");
+        snd_mixer_selem_get_playback_volume_range(elem, &min, &max);
+
+	printf("getting playback\n");
+	snd_mixer_selem_get_playback_volume(elem,
+		SND_MIXER_SCHN_FRONT_LEFT, &volume);
+
+	return (int)(100 * volume / max);
 }
 
 
