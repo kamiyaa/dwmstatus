@@ -18,17 +18,12 @@ Output:
  - c compiler
  - [xcb-util](https://xcb.freedesktop.org/) [For exporting status bar to root X11 window]
  - Kernel options:
-    - CONFIG_PROC_FS: /proc file system support [For audio info]
-   - CONFIG_SYSFS: sysfs file system support [Where most information will be parsed from]
-   - CONFIG_THERMAL_HWMON: Expose thermal sensors as hwmon device [For getting cpu temps]
+    - `CONFIG_PROC_FS`: /proc file system support [For audio info]
+   - `CONFIG_SYSFS`: sysfs file system support [Where most information will be parsed from]
+   - `CONFIG_THERMAL_HWMON`: Expose thermal sensors as hwmon device [For getting cpu temps]
 
 ## Installation
-First, download the source using either HTTP or SSH:
-```
-$ git clone https://gitlab.com/Kamiyaa/ruiji.git
-$ git clone git@gitlab.com:Kamiyaa/ruiji.git
-```
-Then install using **make**:
+Installation using **make**:
 ```
 $ cd dwmstatus/src
 $ make
@@ -44,12 +39,12 @@ $ ninja -C build
 
 ## Running
 ```
-dwmstatus_std  # for outputting to stdout
-dwmstatus_xcb  # for outputting to X11 root window
+$ dwmstatus_std  # for outputting to stdout
+$ dwmstatus_xcb  # for outputting to X11 root window
 ```
 
 ## Configuration
-All configurations are done through config.def.h/config.h
+All configurations are done through `config.def.h`/`config.h`
 to keep the program simple and fast(?).
 Note: some functions may be commented from my usages.
 Uncomment to use them.
