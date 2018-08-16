@@ -11,10 +11,10 @@
 #define CPU_TEMPFILE	"/sys/devices/platform/coretemp.0/hwmon/hwmon0/temp1_input"
 
 /* File with current connectivity status of (wired) network interface */
-#define ETH_CARFILE	"/sys/class/net/enp0s25/carrier"
+#define ETH_CARFILE	"/sys/class/net/enp3s0/carrier"
 
 /* File with current connectivity status of (wireless) network interface */
-#define WLAN_CARFILE	"/sys/class/net/wlp4s0/carrier"
+#define WLAN_CARFILE	"/sys/class/net/wlp5s0/carrier"
 
 /* Directory for battery presence */
 #define BAT_DIR		"/sys/class/power_supply/BAT0"

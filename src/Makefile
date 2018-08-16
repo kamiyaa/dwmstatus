@@ -11,19 +11,20 @@ options:
 	@echo "  LIBS = ${LIBS}"
 
 config.h: config.def.h
+
 	@echo "cp config.def.h -> config.h"
 	cp config.def.h config.h
 
-dwmstatus.o: config.h dwmstatus.c dwmstatus.h
+dwmstatus.o: dwmstatus.c dwmstatus.h config.h
 	${CC} ${CFLAGS} -c dwmstatus.c
 
-dwmstatus_xcb.o: config.h dwmstatus_xcb.c
+dwmstatus_xcb.o: dwmstatus.o dwmstatus_xcb.c
 	${CC} ${CFLAGS} -c dwmstatus_xcb.c
 
 dwmstatus_xcb: dwmstatus.o dwmstatus_xcb.o
 	${CC} ${CFLAGS} $@.o dwmstatus.o -o $@ ${LIBS}
 
-dwmstatus_std.o: config.h dwmstatus_std.c
+dwmstatus_std.o: dwmstatus.o dwmstatus_std.c
 	${CC} ${CFLAGS} -c dwmstatus_std.c
 
 dwmstatus_std: dwmstatus.o dwmstatus_std.o
