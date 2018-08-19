@@ -1,8 +1,14 @@
 /* File indicating AC is present */
 #define AC_FILE		"/sys/class/power_supply/AC/online"
 
+/* Directory for battery presence */
+#define BAT_DIR		"/sys/class/power_supply/BAT0"
+
 /* File with battery value */
-#define BAT_CAPFILE	"/sys/class/power_supply/BAT0/capacity"
+#define BAT_CAPFILE	BAT_DIR "/capacity"
+
+/* File with battery drain information in milliwatts */
+#define BAT_DRAIN_FILE	BAT_DIR "/power_now"
 
 /* File with current frequency of first core */
 #define CPU_FREQFILE	"/sys/devices/system/cpu/cpufreq/policy0/scaling_cur_freq"
@@ -15,12 +21,6 @@
 
 /* File with current connectivity status of (wireless) network interface */
 #define WLAN_CARFILE	"/sys/class/net/wlp5s0/carrier"
-
-/* Directory for battery presence */
-#define BAT_DIR		"/sys/class/power_supply/BAT0"
-
-/* File with battery drain information in milliwatts */
-#define BAT_DRAIN_FILE	"/sys/class/power_supply/BAT0/power_now"
 
 /* Which sound card volume to display */
 #define SOUNDCARD	"default"
