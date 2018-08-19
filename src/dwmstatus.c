@@ -113,27 +113,33 @@ void alsa_set_max_vol()
 	max_vol = max;
 }
 
-unsigned int alsa_volume()
+snd_mixer_t *create_alsa_handle()
 {
 	snd_mixer_t *handle;
-	snd_mixer_selem_id_t *sid;
+
 
 	snd_mixer_open(&handle, 0);
 	snd_mixer_attach(handle, SOUNDCARD);
 	snd_mixer_selem_register(handle, NULL, NULL);
 	snd_mixer_load(handle);
 
+	return handle;
+}
+
+unsigned int alsa_volume(snd_mixer_t *handle)
+{
+	long volume;
+	snd_mixer_selem_id_t *sid;
+	snd_mixer_elem_t *elem;
+
 	snd_mixer_selem_id_alloca(&sid);
 	snd_mixer_selem_id_set_index(sid, 0);
 	snd_mixer_selem_id_set_name(sid, "Master");
 
-	long volume;
-
-	snd_mixer_elem_t *elem = snd_mixer_find_selem(handle, sid);
+	elem = snd_mixer_find_selem(handle, sid);
 
 	snd_mixer_selem_get_playback_volume(elem,
 		SND_MIXER_SCHN_FRONT_LEFT, &volume);
-	snd_mixer_close(handle);
 
 	return volume * 100 / max_vol;
 }

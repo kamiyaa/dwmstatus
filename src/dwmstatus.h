@@ -1,5 +1,8 @@
 #include <sys/sysinfo.h>
 
+#include <alsa/asoundlib.h>
+#include <alsa/mixer.h>
+
 /* Status bar refresh rate */
 static unsigned int status_rrate	= 3;
 /* refresh rate of less important info */
@@ -35,7 +38,8 @@ unsigned long memtotal(struct sysinfo *s_info);
 unsigned long memused(struct sysinfo *s_info);
 
 void alsa_set_max_vol();
-unsigned int alsa_volume();
+snd_mixer_t *create_alsa_handle();
+unsigned int alsa_volume(snd_mixer_t *handle);
 
 /**
  * get and return the current frequency of the core

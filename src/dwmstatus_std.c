@@ -2,6 +2,9 @@
 #include <unistd.h>
 #include <signal.h>
 
+#include <alsa/asoundlib.h>
+#include <alsa/mixer.h>
+
 #include "dwmstatus.h"
 
 static unsigned char keep_running = 1;
@@ -26,9 +29,18 @@ int main()
 	static struct sysinfo s_info;
 	alsa_set_max_vol();
 
-        /* use a counter to update less important info less often */
+	snd_mixer_t *alsa_handle = create_alsa_handle();
+	volume = alsa_volume(alsa_handle);
+
+         /* use a counter to update less important info less often */
 	unsigned int counter = status_lirate;
 	while (keep_running) {
+		int res = snd_mixer_wait(alsa_handle, status_rrate * 1000);
+		if (res >= 0) {
+			res = snd_mixer_handle_events(alsa_handle);
+			volume = alsa_volume(alsa_handle);
+		}
+
 		if (counter >= status_lirate) {
 			counter = 0;
 
@@ -49,15 +61,12 @@ int main()
 
 		}
 
-		volume = alsa_volume();
-
 		/* output and flush status to stdout */
 		printf("%s \u2502 %0.02fGHz \u2502 %u\u00B0C \u2502 [%s] \u2502 Vol: %d%% \u2502 %d:%d \u2502 %s \n",
 			network_status(), cpufreq(), cputemp(), battery_status, volume, up_hours, up_minutes, system_time);
 		fflush(stdout);
 
 		/* refresh rate of status bar */
-		sleep(status_rrate);
 		counter += status_rrate;
 	}
 

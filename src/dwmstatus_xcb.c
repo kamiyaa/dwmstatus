@@ -2,6 +2,8 @@
 #include <unistd.h>
 #include <signal.h>
 
+#include <alsa/asoundlib.h>
+#include <alsa/mixer.h>
 #include <xcb/xcb.h>
 #include <xcb/xcb_atom.h>
 
@@ -34,20 +36,26 @@ int main()
 		root_window = screen->root;
 
 	/* format the uptime into minutes */
-	unsigned int up_minutes, up_hours;
-
+	unsigned int up_minutes, up_hours, volume;
 	char *battery_status, *system_time;
-
 	long uptime;
-
 	static char status[100];
 
 	struct sysinfo s_info;
 	alsa_set_max_vol();
 
+	snd_mixer_t *alsa_handle = create_alsa_handle();
+	volume = alsa_volume(alsa_handle);
+
 	/* use a counter to update less important info less often */
 	unsigned int counter = status_lirate;
 	while (keep_running) {
+		int res = snd_mixer_wait(alsa_handle, status_rrate * 1000);
+		if (res >= 0) {
+			res = snd_mixer_handle_events(alsa_handle);
+			volume = alsa_volume(alsa_handle);
+		}
+
 		if (counter >= status_lirate) {
 			counter = 0;
 
@@ -69,7 +77,7 @@ int main()
 
 		snprintf(status, sizeof(status),
 			"%s \u2502 %0.02fGHz \u2502 %u\u00B0C \u2502 [%s] \u2502 vol: %d \u2502 %d:%d \u2502 %s ",
-			network_status(), cpufreq(), cputemp(), battery_status, alsa_volume(), up_hours, up_minutes, system_time);
+			network_status(), cpufreq(), cputemp(), battery_status, volume, up_hours, up_minutes, system_time);
 
 		/* changed root window name */
 		xcb_change_property(connection,
@@ -85,7 +93,6 @@ int main()
 		xcb_flush(connection);
 
 		/* refresh rate */
-		sleep(status_rrate);
 		counter += status_rrate;
 	}
 
