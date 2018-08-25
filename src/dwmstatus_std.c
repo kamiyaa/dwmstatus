@@ -23,22 +23,23 @@ int main()
 
 	/* format the uptime into minutes */
 	unsigned int up_minutes, up_hours, volume;
-	long uptime;
+	long uptime, alsa_max_vol;
 	char *system_time, *battery_status;
 
 	static struct sysinfo s_info;
-	alsa_set_max_vol();
-
-	snd_mixer_t *alsa_handle = create_alsa_handle();
-	volume = alsa_volume(alsa_handle);
 
          /* use a counter to update less important info less often */
 	unsigned int counter = status_lirate;
+
+	snd_mixer_t *alsa_handle = create_alsa_handle();
+	alsa_max_vol = alsa_get_max_vol(alsa_handle);
+	volume = alsa_volume(alsa_handle) / alsa_max_vol;
+
 	while (keep_running) {
 		int res = snd_mixer_wait(alsa_handle, status_rrate * 1000);
 		if (res >= 0) {
 			res = snd_mixer_handle_events(alsa_handle);
-			volume = alsa_volume(alsa_handle);
+			volume = alsa_volume(alsa_handle) / alsa_max_vol;
 		}
 
 		if (counter >= status_lirate) {

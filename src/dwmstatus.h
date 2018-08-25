@@ -37,7 +37,7 @@ unsigned long memtotal(struct sysinfo *s_info);
  */
 unsigned long memused(struct sysinfo *s_info);
 
-void alsa_set_max_vol();
+long alsa_get_max_vol(snd_mixer_t *handle);
 snd_mixer_t *create_alsa_handle();
 unsigned int alsa_volume(snd_mixer_t *handle);
 

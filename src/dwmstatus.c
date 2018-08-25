@@ -18,8 +18,6 @@
 static const unsigned int rrate_battery	= 30;
 static const unsigned int rrate_ac	= 3;
 
-static long max_vol;
-
 /**
  * grabs sysinfo
  */
@@ -88,15 +86,9 @@ unsigned long memused(struct sysinfo *s_info)
 	return used_mem;
 }
 
-void alsa_set_max_vol()
+long alsa_get_max_vol(snd_mixer_t *handle)
 {
-	snd_mixer_t *handle;
 	snd_mixer_selem_id_t *sid;
-
-	snd_mixer_open(&handle, 0);
-	snd_mixer_attach(handle, SOUNDCARD);
-	snd_mixer_selem_register(handle, NULL, NULL);
-	snd_mixer_load(handle);
 
 	snd_mixer_selem_id_alloca(&sid);
 	snd_mixer_selem_id_set_index(sid, 0);
@@ -108,15 +100,14 @@ void alsa_set_max_vol()
 
         snd_mixer_selem_get_playback_volume_range(elem, &min, &max);
 
-	snd_mixer_close(handle);
+//	snd_mixer_close(handle);
 
-	max_vol = max;
+	return max;
 }
 
 snd_mixer_t *create_alsa_handle()
 {
 	snd_mixer_t *handle;
-
 
 	snd_mixer_open(&handle, 0);
 	snd_mixer_attach(handle, SOUNDCARD);
@@ -141,26 +132,8 @@ unsigned int alsa_volume(snd_mixer_t *handle)
 	snd_mixer_selem_get_playback_volume(elem,
 		SND_MIXER_SCHN_FRONT_LEFT, &volume);
 
-	return volume * 100 / max_vol;
+	return volume * 100;
 }
-
-int alsa_vol_percentage(snd_mixer_t *handle, snd_mixer_selem_id_t *sid)
-{
-	long min, max, volume;
-
-	printf("getting elem\n");
-	snd_mixer_elem_t *elem = snd_mixer_find_selem(handle, sid);
-
-	printf("getting range\n");
-        snd_mixer_selem_get_playback_volume_range(elem, &min, &max);
-
-	printf("getting playback\n");
-	snd_mixer_selem_get_playback_volume(elem,
-		SND_MIXER_SCHN_FRONT_LEFT, &volume);
-
-	return (int)(100 * volume / max);
-}
-
 
 /**
  * get and return the current frequency of the core
@@ -247,8 +220,6 @@ char *power_status()
 
 	/* if we can't open battery file, then we are on AC */
 	if ((fp = fopen(BAT_CAPFILE, "r")) == NULL) {
-		if (status_rrate != rrate_ac)
-			status_rrate = rrate_ac;
 		return "AC";
 	}
 
@@ -274,11 +245,6 @@ char *power_status()
 		if (ac_on == '1')
 			strcat(power_buf, "+");
 	}
-
-	if (ac_on == '1' && status_rrate != rrate_ac)
-		status_rrate = rrate_ac;
-	else if (status_rrate != rrate_battery)
-		status_rrate = rrate_battery;
 
 	/* refresh rate with change depending on if we are
 	 * on ac or battery
