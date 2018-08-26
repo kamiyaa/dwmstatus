@@ -96,6 +96,7 @@ int main()
 		counter += status_rrate;
 	}
 
+	snd_mixer_close(alsa_handle);
 	/* disconnect from X server */
 	xcb_disconnect(connection);
 

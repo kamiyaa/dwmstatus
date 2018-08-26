@@ -71,5 +71,7 @@ int main()
 		counter += status_rrate;
 	}
 
+	snd_mixer_close(alsa_handle);
+
 	return 0;
 }
