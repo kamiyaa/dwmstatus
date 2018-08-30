@@ -208,47 +208,29 @@ float battery_watt_drain()
 /* Power */
 char *power_status()
 {
-	static char ac_on;
 	static char power_buf[7];
 	static unsigned short battery_charge;
+	static int ac_on;
 
-	/* Open up the sysfs file for battery info */
 	FILE *fp;
-	/* If battery exists get battery charge*/
-	unsigned short tmp_charge;
-	int tmp_on;
-
-	/* if we can't open battery file, then we are on AC */
 	if ((fp = fopen(BAT_CAPFILE, "r")) == NULL) {
 		return "AC";
 	}
 
-	/* error if we are on battey, but can't retrieve
-	 * battery life information */
-	if (fscanf(fp, "%hu", &tmp_charge) != 1) {
+	if (fscanf(fp, "%hu", &battery_charge) != 1) {
 		fclose(fp);
-		return "Failed to get battery";
+		return "Batt Err";
 	}
 	fclose(fp);
+	snprintf(power_buf, sizeof(power_buf),
+		"%hu%%", battery_charge);
 
 	if ((fp = fopen(AC_FILE, "r"))) {
-		tmp_on = fgetc(fp);
-		fclose(fp);
-		if (ac_on != tmp_on)
-			ac_on = tmp_on;
-	}
-
-	if (battery_charge != tmp_charge) {
-		battery_charge = tmp_charge;
-		snprintf(power_buf, sizeof(power_buf),
-			"%hu%%", battery_charge);
+		ac_on = fgetc(fp);
 		if (ac_on == '1')
 			strcat(power_buf, "+");
+		fclose(fp);
 	}
-
-	/* refresh rate with change depending on if we are
-	 * on ac or battery
-	 */
 	return power_buf;
 }
 
