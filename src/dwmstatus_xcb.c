@@ -51,7 +51,7 @@ int main()
 	unsigned int counter = status_lirate;
 	while (keep_running) {
 		int res = snd_mixer_wait(alsa_handle, status_rrate * 1000);
-		if (res >= 0) {
+		if (res == 0) {
 			res = snd_mixer_handle_events(alsa_handle);
 			volume = alsa_volume(alsa_handle) / alsa_max_vol;
 		}

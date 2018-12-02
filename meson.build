@@ -6,4 +6,5 @@ project(
 	default_options: ['warning_level=2'],
 )
 
+add_global_arguments('-Wvla', language : 'c')
 subdir('src')
