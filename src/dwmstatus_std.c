@@ -29,20 +29,20 @@ int main()
 	static struct sysinfo s_info;
 
          /* use a counter to update less important info less often */
-	unsigned int counter = status_lirate;
+	unsigned int counter = STATUS_REFRESH_RATE_LOW;
 
 	snd_mixer_t *alsa_handle = create_alsa_handle();
 	alsa_max_vol = alsa_get_max_vol(alsa_handle);
 	volume = alsa_volume(alsa_handle) / alsa_max_vol;
 
 	while (keep_running) {
-		int res = snd_mixer_wait(alsa_handle, status_rrate * 1000);
+		int res = snd_mixer_wait(alsa_handle, STATUS_REFRESH_RATE_REG * 1000);
 		if (res == 0) {
 			res = snd_mixer_handle_events(alsa_handle);
 			volume = alsa_volume(alsa_handle) / alsa_max_vol;
 		}
 
-		if (counter >= status_lirate) {
+		if (counter >= STATUS_REFRESH_RATE_LOW) {
 			counter = 0;
 
 			/* setup sysinfo with values */
@@ -63,12 +63,12 @@ int main()
 		}
 
 		/* output and flush status to stdout */
-		printf("%s \u2502 %0.02fGHz \u2502 %u\u00B0C \u2502 [%s] \u2502 Vol: %d%% \u2502 %d:%d \u2502 %s ",
+		printf("%s \u2502 %0.02fGHz \u2502 %u\u00B0C \u2502 [%s] \u2502 Vol: %d%% \u2502 %d:%d \u2502 %s \n",
 			network_status(), cpufreq(), cputemp(), battery_status, volume, up_hours, up_minutes, system_time);
 		fflush(stdout);
 
 		/* refresh rate of status bar */
-		counter += status_rrate;
+		counter += STATUS_REFRESH_RATE_REG;
 	}
 
 	snd_mixer_close(alsa_handle);

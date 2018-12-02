@@ -1,3 +1,8 @@
+
+/* Refresh rates of status bar */
+#define STATUS_REFRESH_RATE_REG	3
+#define STATUS_REFRESH_RATE_LOW	30
+
 /* File indicating AC is present */
 #define AC_FILE		"/sys/class/power_supply/AC/online"
 
@@ -24,3 +29,5 @@
 
 /* Which sound card volume to display */
 #define SOUNDCARD	"default"
+
+#define SOUNDCONTROL	"Master"

@@ -48,15 +48,15 @@ int main()
 	volume = alsa_volume(alsa_handle) / alsa_max_vol;
 
 	/* use a counter to update less important info less often */
-	unsigned int counter = status_lirate;
+	unsigned int counter = STATUS_REFRESH_RATE_LOW;
 	while (keep_running) {
-		int res = snd_mixer_wait(alsa_handle, status_rrate * 1000);
+		int res = snd_mixer_wait(alsa_handle, STATUS_REFRESH_RATE_REG * 1000);
 		if (res == 0) {
 			res = snd_mixer_handle_events(alsa_handle);
 			volume = alsa_volume(alsa_handle) / alsa_max_vol;
 		}
 
-		if (counter >= status_lirate) {
+		if (counter >= STATUS_REFRESH_RATE_LOW) {
 			counter = 0;
 
 			/* setup sysinfo with values */
@@ -93,7 +93,7 @@ int main()
 		xcb_flush(connection);
 
 		/* refresh rate */
-		counter += status_rrate;
+		counter += STATUS_REFRESH_RATE_REG;
 	}
 
 	snd_mixer_close(alsa_handle);

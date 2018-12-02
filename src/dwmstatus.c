@@ -10,7 +10,6 @@
 #include <alsa/mixer.h>
 
 #include "dwmstatus.h"
-#include "config.h"
 
 #define alloca(x)  __builtin_alloca(x)
 
@@ -125,7 +124,7 @@ unsigned int alsa_volume(snd_mixer_t *handle)
 
 	snd_mixer_selem_id_alloca(&sid);
 	snd_mixer_selem_id_set_index(sid, 0);
-	snd_mixer_selem_id_set_name(sid, "Master");
+	snd_mixer_selem_id_set_name(sid, SOUNDCONTROL);
 
 	elem = snd_mixer_find_selem(handle, sid);
 
@@ -175,22 +174,6 @@ short cputemp()
 	return core_temp;
 }
 
-/* Volume (Hexadecimal) */
-/* unsigned int get_volume()
-{
-	FILE *codec;
-	codec = fopen(SOUNDFILE, "r");
-	char buffer[64];
-	unsigned int hexvoll, hexvolr;
-
-	for (int i = 0; i < 41; i++)
-		fgets(buffer, 64, codec);
-	fgets(buffer, 64, codec);
-	sscanf(buffer, "  Amp-Out vals:  [%x %x]\n", &hexvoll, &hexvolr);
-	fclose(codec);
-	return hexvoll;
-}*/
-
 float battery_watt_drain()
 {
 	FILE *fp;
@@ -209,6 +192,7 @@ float battery_watt_drain()
 char *power_status()
 {
 	static char power_buf[7];
+	static unsigned short old_charge = 0;
 	static unsigned short battery_charge;
 	static int ac_on;
 
@@ -222,6 +206,12 @@ char *power_status()
 		return "Batt Err";
 	}
 	fclose(fp);
+	if (battery_charge == old_charge) {
+		return power_buf;
+	}
+
+	old_charge = battery_charge;
+
 	snprintf(power_buf, sizeof(power_buf),
 		"%hu%%", battery_charge);
 

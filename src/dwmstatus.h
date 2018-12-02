@@ -3,10 +3,7 @@
 #include <alsa/asoundlib.h>
 #include <alsa/mixer.h>
 
-/* Status bar refresh rate */
-static unsigned int status_rrate	= 3;
-/* refresh rate of less important info */
-static const unsigned int status_lirate	= 30;
+#include "config.h"
 
 /**
  * grabs sysinfo
