@@ -11,11 +11,7 @@
 
 #include "dwmstatus.h"
 
-#define alloca(x)  __builtin_alloca(x)
-
-/* Status bar refresh rates on battery and on AC */
-static const unsigned int rrate_battery	= 30;
-static const unsigned int rrate_ac	= 3;
+// #define alloca(x)  __builtin_alloca(x)
 
 /**
  * grabs sysinfo
@@ -232,8 +228,8 @@ char *unixtime()
 {
 	static char time_buf[22];
 	static const char *format = "%a %m/%d  %I:%M";
+	static time_t date;
 
-	time_t date;
 	time(&date);
 
 	struct tm *tm_info = localtime(&date);
