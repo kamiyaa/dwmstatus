@@ -63,7 +63,7 @@ int main()
 		}
 
 		/* output and flush status to stdout */
-		printf("%s \u2502 %0.02fGHz \u2502 %u\u00B0C \u2502 [%s] \u2502 Vol: %d%% \u2502 %d:%01d \u2502 %s \n",
+		printf("%s \u2502 %0.02fGHz \u2502 %u\u00B0C \u2502 [%s] \u2502 Vol: %d%% \u2502 %d:%02d \u2502 %s \n",
 			network_status(), cpufreq(), cputemp(), battery_status, volume, up_hours, up_minutes, system_time);
 		fflush(stdout);
 
