@@ -92,10 +92,7 @@ long alsa_get_max_vol(snd_mixer_t *handle)
 	long min, max;
 
 	snd_mixer_elem_t *elem = snd_mixer_find_selem(handle, sid);
-
         snd_mixer_selem_get_playback_volume_range(elem, &min, &max);
-
-//	snd_mixer_close(handle);
 
 	return max;
 }

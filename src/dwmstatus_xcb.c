@@ -76,7 +76,7 @@ int main()
 		}
 
 		snprintf(status, sizeof(status),
-			"%s \u2502 %0.02fGHz \u2502 %u\u00B0C \u2502 [%s] \u2502 vol: %d \u2502 %d:%d \u2502 %s ",
+			"%s \u2502 %0.02fGHz \u2502 %u\u00B0C \u2502 [%s] \u2502 vol: %d \u2502 %d:%01d \u2502 %s ",
 			network_status(), cpufreq(), cputemp(), battery_status, volume, up_hours, up_minutes, system_time);
 
 		/* changed root window name */
