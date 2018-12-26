@@ -9,6 +9,17 @@
 #include <alsa/asoundlib.h>
 #include <alsa/mixer.h>
 
+#include <sys/ioctl.h>
+/* socket systemcall */
+#include <sys/types.h>
+#include <sys/socket.h>
+
+
+#include <linux/if.h>
+
+/* Wireless monitoring */
+#include <linux/wireless.h>
+
 #include "dwmstatus.h"
 
 // #define alloca(x)  __builtin_alloca(x)
@@ -174,8 +185,9 @@ float battery_watt_drain()
 	if ((fp = fopen(BAT_DRAIN_FILE, "r")) == NULL)
 		return -1;
 
-	unsigned int milliwatts;
-	if (fscanf(fp, "%u", &milliwatts) != 1)
+
+unsigned int milliwatts;
+if (fscanf(fp, "%u", &milliwatts) != 1)
 		return -1;
 
 	return milliwatts / 10000000;
@@ -233,4 +245,26 @@ char *unixtime()
 	strftime(time_buf, sizeof(time_buf), format, tm_info);
 
 	return time_buf;
+}
+
+char *wifi_ssid(char *iface)
+{
+    int           fd;
+    struct iwreq  w;
+    char          essid[IW_ESSID_MAX_SIZE];
+
+    if (!iface) return NULL;
+
+    fd = socket(AF_INET, SOCK_DGRAM, 0);
+
+    strncpy (w.ifr_ifrn.ifrn_name, iface, IFNAMSIZ);
+    memset (essid, 0, IW_ESSID_MAX_SIZE);
+    w.u.essid.pointer = (caddr_t *) essid;
+    w.u.data.length = IW_ESSID_MAX_SIZE;
+    w.u.data.flags = 0;
+
+    ioctl (fd, SIOCGIWESSID, &w);
+    close (fd);
+
+    return strdup (essid);
 }

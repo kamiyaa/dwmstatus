@@ -54,3 +54,4 @@ Uncomment to use them.
  - Displays a single cpu's frequency and temperature
  - Displays network connections
    - only if connected to access point, not internet access
+ - Displays wifi SSID 

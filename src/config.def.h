@@ -31,3 +31,5 @@
 #define SOUNDCARD	"default"
 
 #define SOUNDCONTROL	"Master"
+/* Wich wireless to use */
+#define IW_INTERFACE    "wlp2s0"
