@@ -26,9 +26,9 @@ int main()
 	long uptime, alsa_max_vol;
 	char *system_time, *battery_status;
 
-	static struct sysinfo s_info;
+        static struct sysinfo s_info;
 
-         /* use a counter to update less important info less often */
+        /* use a counter to update less important info less often */
 	unsigned int counter = STATUS_REFRESH_RATE_LOW;
 
 	snd_mixer_t *alsa_handle = create_alsa_handle();
@@ -36,39 +36,39 @@ int main()
 	volume = alsa_volume(alsa_handle) / alsa_max_vol;
 
 	while (keep_running) {
-		int res = snd_mixer_wait(alsa_handle, STATUS_REFRESH_RATE_REG * 1000);
-		if (res == 0) {
-			res = snd_mixer_handle_events(alsa_handle);
-			volume = alsa_volume(alsa_handle) / alsa_max_vol;
-		}
+            int res = snd_mixer_wait(alsa_handle, STATUS_REFRESH_RATE_REG * 1000);
+            if (res == 0) {
+                res = snd_mixer_handle_events(alsa_handle);
+                volume = alsa_volume(alsa_handle) / alsa_max_vol;
+            }
 
-		if (counter >= STATUS_REFRESH_RATE_LOW) {
-			counter = 0;
+            if (counter >= STATUS_REFRESH_RATE_LOW) {
+                counter = 0;
 
-			/* setup sysinfo with values */
-			sysinfo(&s_info);
+                /* setup sysinfo with values */
+                sysinfo(&s_info);
 
-			/* get the uptime of machine in minutes */
-			uptime = s_info.uptime / 60;
-			/* format the uptime into minutes */
-			up_hours = uptime / 60;
-			up_minutes = uptime % 60;
+                /* get the uptime of machine in minutes */
+                uptime = s_info.uptime / 60;
+                /* format the uptime into minutes */
+                up_hours = uptime / 60;
+                up_minutes = uptime % 60;
 
-			/* get the battery life */
-			battery_status = power_status();
+                /* get the battery life */
+                battery_status = power_status();
 
-			/* get the system time */
-			system_time = unixtime();
+                /* get the system time */
+                system_time = unixtime();
 
-		}
+            }
 
-		/* output and flush status to stdout */
-		printf("%s \u2502 %0.02fGHz \u2502 %u\u00B0C \u2502 [%s] \u2502 Vol: %d%% \u2502 %d:%02d \u2502 %s \n",
-			network_status(), cpufreq(), cputemp(), battery_status, volume, up_hours, up_minutes, system_time);
-		fflush(stdout);
+            /* output and flush status to stdout */
+            printf("%s \u2502 %0.02fGHz \u2502 %u\u00B0C \u2502 [%s] \u2502 Vol: %d%% \u2502 %d:%02d \u2502 %s \u2502 %s\n",
+                   network_status(), cpufreq(), cputemp(), battery_status, volume, up_hours, up_minutes, system_time,wifi_ssid(IW_INTERFACE));
+            fflush(stdout);
 
-		/* refresh rate of status bar */
-		counter += STATUS_REFRESH_RATE_REG;
+            /* refresh rate of status bar */
+            counter += STATUS_REFRESH_RATE_REG;
 	}
 
 	snd_mixer_close(alsa_handle);

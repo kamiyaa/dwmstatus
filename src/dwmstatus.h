@@ -61,3 +61,7 @@ char *power_status();
  * day_of_week month/day  hour:minutes
  */
 char *unixtime(void);
+
+/* get wireless SSID */
+
+char *wifi_ssid();

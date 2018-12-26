@@ -76,8 +76,8 @@ int main()
 		}
 
 		snprintf(status, sizeof(status),
-			"%s \u2502 %0.02fGHz \u2502 %u\u00B0C \u2502 [%s] \u2502 vol: %d \u2502 %d:%02d \u2502 %s ",
-			network_status(), cpufreq(), cputemp(), battery_status, volume, up_hours, up_minutes, system_time);
+			"%s \u2502 %0.02fGHz \u2502 %u\u00B0C \u2502 [%s] \u2502 vol: %d \u2502 %d:%02d \u2502 %s \u2602 %s ",
+                         network_status(), cpufreq(), cputemp(), battery_status, volume, up_hours, up_minutes, system_time,wifi_ssid(IW_INTERFACE));
 
 		/* changed root window name */
 		xcb_change_property(connection,
