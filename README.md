@@ -1,7 +1,9 @@
 # dwmstatus
 ## Description
 A simple, customizable status bar for Dynamic Window Manager(dwm)
+
 Exports status bar to X11 root window via xcb instead of xlib
+
 Output:
 ```
 /* charging */
