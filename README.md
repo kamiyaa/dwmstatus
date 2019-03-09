@@ -1,9 +1,7 @@
 # dwmstatus
 ## Description
-A simple, customizable status bar for Dynamic Window Manager(dwm), written in C.
-
+A simple, customizable status bar for Dynamic Window Manager(dwm)
 Exports status bar to X11 root window via xcb instead of xlib
-
 Output:
 ```
 /* charging */
@@ -18,7 +16,6 @@ Output:
  - c compiler
  - [xcb-util](https://xcb.freedesktop.org/) [For exporting status bar to root X11 window]
  - Kernel options:
-    - `CONFIG_PROC_FS`: /proc file system support [For audio info]
    - `CONFIG_SYSFS`: sysfs file system support [Where most information will be parsed from]
    - `CONFIG_THERMAL_HWMON`: Expose thermal sensors as hwmon device [For getting cpu temps]
 
