@@ -37,6 +37,7 @@ unsigned long memused(struct sysinfo *s_info);
 long alsa_get_max_vol(snd_mixer_t *handle);
 snd_mixer_t *create_alsa_handle();
 unsigned int alsa_volume(snd_mixer_t *handle);
+unsigned int alsa_volume_percent(snd_mixer_t *handle, long unit);
 
 /**
  * get and return the current frequency of the core

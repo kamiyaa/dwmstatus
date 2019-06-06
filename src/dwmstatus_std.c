@@ -19,27 +19,26 @@ void sigint_handler()
 
 int main()
 {
-	signal(SIGINT, sigint_handler);
-
 	/* format the uptime into minutes */
 	unsigned int up_minutes, up_hours, volume;
-	long uptime, alsa_max_vol;
+	long uptime, alsa_vol_unit;
 	char *system_time, *battery_status;
 
-	static struct sysinfo s_info;
+	struct sysinfo s_info;
 
          /* use a counter to update less important info less often */
 	unsigned int counter = STATUS_REFRESH_RATE_LOW;
 
+	signal(SIGINT, sigint_handler);
+
 	snd_mixer_t *alsa_handle = create_alsa_handle();
-	alsa_max_vol = alsa_get_max_vol(alsa_handle);
-	volume = alsa_volume(alsa_handle) / alsa_max_vol;
+	alsa_vol_unit = alsa_get_max_vol(alsa_handle) / 100;
+	volume = alsa_volume_percent(alsa_handle, alsa_vol_unit);
 
 	while (keep_running) {
-		int res = snd_mixer_wait(alsa_handle, STATUS_REFRESH_RATE_REG * 1000);
-		if (res == 0) {
-			res = snd_mixer_handle_events(alsa_handle);
-			volume = alsa_volume(alsa_handle) / alsa_max_vol;
+		if (snd_mixer_wait(alsa_handle, STATUS_REFRESH_RATE_REG * 1000) == 0) {
+			snd_mixer_handle_events(alsa_handle);
+			volume = alsa_volume_percent(alsa_handle, alsa_vol_unit);
 		}
 
 		if (counter >= STATUS_REFRESH_RATE_LOW) {

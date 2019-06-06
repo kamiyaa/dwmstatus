@@ -124,7 +124,13 @@ unsigned int alsa_volume(snd_mixer_t *handle)
 	snd_mixer_selem_get_playback_volume(elem,
 		SND_MIXER_SCHN_FRONT_LEFT, &volume);
 
-	return volume * 100;
+	return volume;
+}
+
+unsigned int alsa_volume_percent(snd_mixer_t *handle, long unit)
+{
+	long volume = alsa_volume(handle);
+	return (double)volume / (double)unit;
 }
 
 /**

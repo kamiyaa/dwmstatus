@@ -22,7 +22,12 @@ void sigint_handler()
 
 int main()
 {
-	signal(SIGINT, sigint_handler);
+	/* format the uptime into minutes */
+	unsigned int up_minutes, up_hours, volume;
+	char *battery_status, *system_time;
+	long uptime, alsa_vol_unit;
+	static char status[100];
+	struct sysinfo s_info;
 
 	/* display number */
 	int screen_default_nbr;
@@ -32,28 +37,22 @@ int main()
 	/* get the screen and the root window */
 	xcb_screen_t *screen = xcb_setup_roots_iterator(xcb_get_setup(connection)).data;
 	xcb_window_t root_window = 0;
+
+	signal(SIGINT, sigint_handler);
+
 	if (screen)
 		root_window = screen->root;
 
-	/* format the uptime into minutes */
-	unsigned int up_minutes, up_hours, volume;
-	char *battery_status, *system_time;
-	long uptime, alsa_max_vol;
-	static char status[100];
-
-	struct sysinfo s_info;
-
 	snd_mixer_t *alsa_handle = create_alsa_handle();
-	alsa_max_vol = alsa_get_max_vol(alsa_handle);
-	volume = alsa_volume(alsa_handle) / alsa_max_vol;
+	alsa_vol_unit = alsa_get_max_vol(alsa_handle) / 100;
+	volume = alsa_volume_percent(alsa_handle, alsa_vol_unit);
 
 	/* use a counter to update less important info less often */
 	unsigned int counter = STATUS_REFRESH_RATE_LOW;
 	while (keep_running) {
-		int res = snd_mixer_wait(alsa_handle, STATUS_REFRESH_RATE_REG * 1000);
-		if (res == 0) {
-			res = snd_mixer_handle_events(alsa_handle);
-			volume = alsa_volume(alsa_handle) / alsa_max_vol;
+		if (snd_mixer_wait(alsa_handle, STATUS_REFRESH_RATE_REG * 1000) == 0) {
+			snd_mixer_handle_events(alsa_handle);
+			volume = alsa_get_max_vol(alsa_handle) / 100;
 		}
 
 		if (counter >= STATUS_REFRESH_RATE_LOW) {
